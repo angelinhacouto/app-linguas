@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { HeroAvatar, HeroMood } from '@/components/HeroAvatar';
 import { HeroPowerEffects } from '@/components/HeroPowerEffects';
-import { WordObjectCard } from '@/components/WordObjectCard';
+import { LessonCardArena } from '@/components/LessonCardArena';
 import { COLORS } from '@/constants';
 import { HeroReactionTier } from '@/constants/heroReactions';
 import { SuperHero } from '@/constants/heroes';
@@ -48,7 +48,12 @@ export function HeroLessonStage({
 
   return (
     <View style={styles.wrap}>
-      <WordObjectCard word={word} revealed={cardRevealed} highlighted={cardHighlighted} />
+      <LessonCardArena
+        word={word}
+        revealed={cardRevealed}
+        highlighted={cardHighlighted}
+        accentColor={hero.accent}
+      />
 
       <View style={[styles.heroPanel, { borderColor: hero.accent }]}>
         <View style={styles.avatarWrap}>
