@@ -1,10 +1,15 @@
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { EnvironmentCard } from '@/components/EnvironmentCard';
 import { HeroAvatar } from '@/components/HeroAvatar';
 import { LessonCard } from '@/components/LessonCard';
 import { TechBackground } from '@/components/TechBackground';
 import { getLessonsByAge } from '@/data/lessons';
+import {
+  getEnvironmentWords,
+  getEnvironmentsByGroup,
+} from '@/data/environments';
 import { COLORS } from '@/constants';
 import { getSuperHero } from '@/constants/heroes';
 import { getLanguage } from '@/constants/languages';
@@ -28,6 +33,10 @@ export default function LearnScreen() {
   const superHero = getSuperHero(hero ?? 'spider-man');
   const lang = getLanguage(languageId);
   const lessons = getLessonsByAge(ageGroupId, languageId);
+  const themeLessons = lessons.filter((lesson) => lesson.kind !== 'environment');
+  const isYoungExplorer = Number(studentAge) === 3;
+  const houseEnvironments = getEnvironmentsByGroup('house');
+  const natureEnvironments = getEnvironmentsByGroup('nature');
   const [heroLine, setHeroLine] = useState(superHero.greeting);
 
   const handleHeroTap = useCallback(() => {
@@ -66,12 +75,67 @@ export default function LearnScreen() {
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>🎯 Escolha sua missão</Text>
-        <Text style={styles.sectionSub}>
-          {superHero.name} vai te ajudar a aprender {lang.label.toLowerCase()}!
-        </Text>
+        {isYoungExplorer ? (
+          <>
+            <Text style={styles.sectionTitle}>🏠 Explorar a Casa</Text>
+            <Text style={styles.sectionSub}>
+              Entre em cada cômodo e toque nos objetos para ouvir as palavras!
+            </Text>
+            {houseEnvironments.map((environment) => (
+              <EnvironmentCard
+                key={environment.id}
+                environment={environment}
+                wordCount={getEnvironmentWords(environment.id, languageId).length}
+                onPress={() =>
+                  router.push({
+                    pathname: `/explore/${environment.id}`,
+                    params: {
+                      name: studentName,
+                      language: languageId,
+                      hero: superHero.id,
+                    },
+                  })
+                }
+              />
+            ))}
 
-        {lessons.map((lesson) => (
+            <Text style={[styles.sectionTitle, styles.sectionGap]}>🌍 Explorar a Natureza</Text>
+            <Text style={styles.sectionSub}>
+              Floresta, praia, parque e fazenda esperam por você!
+            </Text>
+            {natureEnvironments.map((environment) => (
+              <EnvironmentCard
+                key={environment.id}
+                environment={environment}
+                wordCount={getEnvironmentWords(environment.id, languageId).length}
+                onPress={() =>
+                  router.push({
+                    pathname: `/explore/${environment.id}`,
+                    params: {
+                      name: studentName,
+                      language: languageId,
+                      hero: superHero.id,
+                    },
+                  })
+                }
+              />
+            ))}
+
+            <Text style={[styles.sectionTitle, styles.sectionGap]}>🎯 Missões extras</Text>
+            <Text style={styles.sectionSub}>
+              Quando quiser, pratique também com estas missões!
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.sectionTitle}>🎯 Escolha sua missão</Text>
+            <Text style={styles.sectionSub}>
+              {superHero.name} vai te ajudar a aprender {lang.label.toLowerCase()}!
+            </Text>
+          </>
+        )}
+
+        {themeLessons.map((lesson) => (
           <LessonCard
             key={lesson.id}
             lesson={lesson}
@@ -119,5 +183,6 @@ const styles = StyleSheet.create({
   tapHero: { fontSize: 11, color: COLORS.primary, marginTop: 4 },
   meta: { fontSize: 13, color: COLORS.textLight, marginTop: 6 },
   sectionTitle: { fontSize: 20, fontWeight: '800', color: COLORS.text, marginBottom: 4 },
+  sectionGap: { marginTop: 24 },
   sectionSub: { fontSize: 14, color: COLORS.textLight, marginBottom: 20 },
 });

@@ -22,6 +22,33 @@ export interface Word {
   translation: string;
   emoji: string;
   hint?: string;
+  /** Posição no cenário de exploração (% da largura/altura) */
+  position?: { x: number; y: number };
+}
+
+export type LessonKind = 'theme' | 'environment';
+
+export type EnvironmentId =
+  | 'bedroom'
+  | 'kitchen'
+  | 'living-room'
+  | 'bathroom'
+  | 'forest'
+  | 'beach'
+  | 'playground'
+  | 'farm';
+
+export interface EnvironmentMeta {
+  id: EnvironmentId;
+  title: string;
+  subtitle: string;
+  emoji: string;
+  group: 'house' | 'nature';
+  skyColor: string;
+  groundColor: string;
+  accentColor: string;
+  decor: { emoji: string; x: number; y: number; size?: number }[];
+  introLine: string;
 }
 
 export interface Lesson {
@@ -31,6 +58,8 @@ export interface Lesson {
   ageGroupId: AgeGroupId;
   language: LanguageId;
   words: Word[];
+  kind?: LessonKind;
+  environmentId?: EnvironmentId;
 }
 
 export type PronunciationResult = 'excellent' | 'good' | 'try_again';

@@ -17,6 +17,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ title: APP_NAME, headerShown: false }} />
         <Stack.Screen name="learn" options={{ title: 'Missões', headerBackTitle: 'Voltar' }} />
+        <Stack.Screen name="explore/[environmentId]" options={{ title: 'Explorar' }} />
         <Stack.Screen name="lessons/[ageGroup]" options={{ title: 'Lições' }} />
         <Stack.Screen name="play/[lessonId]" options={{ title: 'Treino' }} />
       </Stack>
