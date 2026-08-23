@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Linguas Kids",
+    "slug": "app-linguas",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "applinguas",
+    "splash": {
+      "backgroundColor": "#6C63FF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.applinguas.kids",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Precisamos do microfone para ouvir e corrigir a pronúncia da criança."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#6C63FF"
+      },
+      "package": "com.applinguas.kids",
+      "permissions": ["RECORD_AUDIO"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Precisamos do microfone para ouvir e corrigir a pronúncia da criança."
+        }
+      ]
+    ]
+  }
+}

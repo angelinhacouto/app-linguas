@@ -1,0 +1,38 @@
+name: Feature request
+description: Sugerir uma nova funcionalidade
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Qual problema ou necessidade?
+      placeholder: Ex. crianças de 3 anos precisam de feedback mais visual
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solução proposta
+    validations:
+      required: true
+
+  - type: dropdown
+    id: age_group
+    attributes:
+      label: Faixa etária relacionada
+      options:
+        - 3–4 anos
+        - 4–5 anos
+        - 5–6 anos
+        - Todas
+        - N/A
+
+  - type: checkboxes
+    id: platforms
+    attributes:
+      label: Plataformas
+      options:
+        - label: Web
+        - label: Mobile (Android/iOS)

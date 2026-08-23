@@ -1,0 +1,52 @@
+name: Bug report
+description: Reportar um problema no app
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar! Quanto mais detalhes, mais rápido corrigimos.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plataforma
+      options:
+        - Web (navegador)
+        - Android
+        - iOS
+        - Outro
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Versão / commit (se souber)
+      placeholder: ex. main, v1.0.0
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passos para reproduzir
+      placeholder: |
+        1. Abrir lição Animais
+        2. Tocar no microfone
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamento esperado
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Comportamento atual
+    validations:
+      required: true
