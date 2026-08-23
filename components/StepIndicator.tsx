@@ -6,7 +6,7 @@ interface StepIndicatorProps {
   total?: number;
 }
 
-const LABELS = ['Idade', 'Nome', 'Herói', 'Idioma'];
+const LABELS = ['Missão', 'Nome', 'Idade', 'Idioma'];
 
 export function StepIndicator({ current, total = 4 }: StepIndicatorProps) {
   return (

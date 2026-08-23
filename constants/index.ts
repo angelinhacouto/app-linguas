@@ -8,7 +8,7 @@ export const AGE_GROUPS: AgeGroup[] = [
     label: '3–4 anos',
     minAge: 3,
     maxAge: 4,
-    description: 'Missão: palavras simples com o Aranha-Hero',
+    description: 'Missão: explorar ambientes e palavras simples',
     emoji: '🕷️',
   },
   {
@@ -16,7 +16,7 @@ export const AGE_GROUPS: AgeGroup[] = [
     label: '4–5 anos',
     minAge: 4,
     maxAge: 5,
-    description: 'Missão: frases curtas com o Raio-Hero',
+    description: 'Missão: frases curtas e vocabulário',
     emoji: '⚡',
   },
   {
@@ -24,7 +24,7 @@ export const AGE_GROUPS: AgeGroup[] = [
     label: '5–6 anos',
     minAge: 5,
     maxAge: 6,
-    description: 'Missão: desafios com o Tech-Hero',
+    description: 'Missão: desafios e pronúncia',
     emoji: '🤖',
   },
 ];

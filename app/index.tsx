@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { HeroAgeCard } from '@/components/HeroAgeCard';
-import { HeroSelectCard } from '@/components/HeroSelectCard';
+import { AgeCard } from '@/components/AgeCard';
 import { LanguageCard } from '@/components/LanguageCard';
+import { MissionWelcome } from '@/components/MissionWelcome';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { TechInput } from '@/components/TechInput';
 import { APP_NAME, COLORS, STUDENT_AGES } from '@/constants';
-import { HeroId, SUPER_HEROES } from '@/constants/heroes';
+import { HeroId } from '@/constants/heroes';
 import { LANGUAGES } from '@/constants/languages';
 import { AgeGroupId, LanguageId } from '@/types';
 
@@ -59,20 +59,11 @@ export default function HomeScreen() {
           <StepIndicator current={step} />
 
           {step === 1 && (
-            <View>
-              <Text style={styles.title}>Qual a idade do herói?</Text>
-              <Text style={styles.subtitle}>Escolha a idade do aluno</Text>
-              {STUDENT_AGES.map(({ age, ageGroupId: groupId }) => (
-                <HeroAgeCard
-                  key={age}
-                  age={age}
-                  ageGroupId={groupId}
-                  selected={selectedAge === age}
-                  onPress={() => handleAgeSelect(age, groupId)}
-                />
-              ))}
-              <TechButton label="Continuar" emoji="➡️" onPress={() => setStep(2)} style={styles.button} />
-            </View>
+            <MissionWelcome
+              selectedHeroId={heroId}
+              onSelectHero={setHeroId}
+              onStart={() => setStep(2)}
+            />
           )}
 
           {step === 2 && (
@@ -100,18 +91,17 @@ export default function HomeScreen() {
 
           {step === 3 && (
             <View>
-              <Text style={styles.title}>Escolha seu super-herói!</Text>
-              <Text style={styles.subtitle}>Seu mentor nas missões de idiomas</Text>
-              <View style={styles.heroGrid}>
-                {SUPER_HEROES.map((hero) => (
-                  <HeroSelectCard
-                    key={hero.id}
-                    hero={hero}
-                    selected={heroId === hero.id}
-                    onPress={() => setHeroId(hero.id)}
-                  />
-                ))}
-              </View>
+              <Text style={styles.title}>Qual a idade do aluno?</Text>
+              <Text style={styles.subtitle}>Escolha a idade para personalizar a missão</Text>
+              {STUDENT_AGES.map(({ age, ageGroupId: groupId }) => (
+                <AgeCard
+                  key={age}
+                  age={age}
+                  ageGroupId={groupId}
+                  selected={selectedAge === age}
+                  onPress={() => handleAgeSelect(age, groupId)}
+                />
+              ))}
               <View style={styles.row}>
                 <TechButton label="Voltar" variant="secondary" onPress={() => setStep(2)} style={styles.halfButton} />
                 <TechButton label="Continuar" emoji="➡️" onPress={() => setStep(4)} style={styles.halfButton} />
@@ -167,13 +157,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-  heroGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  button: { alignSelf: 'center', marginTop: 8 },
   row: { flexDirection: 'row', gap: 12, justifyContent: 'center', marginTop: 8 },
   halfButton: { minWidth: 140, flex: 1 },
 });
