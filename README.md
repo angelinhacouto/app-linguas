@@ -47,14 +47,12 @@ No navegador, acesse o endereço que aparecer no terminal (geralmente `http://lo
 
 A versão **web** pode ser publicada na Vercel com CI no GitHub.
 
-Guia completo: **[docs/DEPLOY.md](docs/DEPLOY.md)**
+Guia completo: **[docs/VERCEL-INTEGRACAO.md](docs/VERCEL-INTEGRACAO.md)** (passo a passo para `angelinhacouto`)
 
 ```bash
 # Resumo rápido
-git init && git add . && git commit -m "Initial commit"
-git remote add origin https://github.com/SEU_USUARIO/app-linguas.git
 git push -u origin main
-# Depois: importar repo na Vercel → Deploy automático
+# Depois: vercel.com/new → Importar angelinhacouto/app-linguas → Deploy
 ```
 
 ## Estrutura do projeto

@@ -1,9 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "linguas-kids",
   "buildCommand": "npm run build:web",
   "outputDirectory": "dist",
   "installCommand": "npm install",
+  "devCommand": "npm run web",
   "framework": null,
+  "regions": ["gru1"],
   "rewrites": [
     {
       "source": "/((?!.*\\.).*)",
