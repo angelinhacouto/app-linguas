@@ -21,7 +21,7 @@ export function MicButton({ isRecording, onPress, disabled }: MicButtonProps) {
     >
       <Text style={styles.emoji}>{isRecording ? '⏹️' : '🎤'}</Text>
       <Text style={styles.label}>
-        {isRecording ? 'Parar' : 'Falar'}
+        {isRecording ? 'Ouvindo...' : 'Falar'}
       </Text>
     </Pressable>
   );

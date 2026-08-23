@@ -40,6 +40,8 @@ export interface PronunciationFeedback {
   score: number;
   message: string;
   encouragement: string;
+  heard?: string;
+  target?: string;
 }
 
 export interface StudentProfile {

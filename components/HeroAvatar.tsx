@@ -12,7 +12,7 @@ import { getHeroImageSource } from '@/constants/heroImages';
 import { HeroId, SuperHero, getSuperHero } from '@/constants/heroes';
 
 type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
-export type HeroMood = 'idle' | 'happy' | 'encourage';
+export type HeroMood = 'idle' | 'happy' | 'encourage' | 'power' | 'teach' | 'practice' | 'present';
 
 interface HeroAvatarProps {
   heroId: HeroId | string;
@@ -77,23 +77,44 @@ export function HeroAvatar({
   useEffect(() => {
     if (mood === 'idle') return;
 
-    if (mood === 'happy') {
+    if (mood === 'happy' || mood === 'power') {
       Animated.parallel([
         Animated.sequence([
-          Animated.spring(scale, { toValue: 1.18, friction: 4, useNativeDriver: true }),
+          Animated.spring(scale, { toValue: mood === 'power' ? 1.22 : 1.18, friction: 3, useNativeDriver: true }),
           Animated.spring(scale, { toValue: 1, friction: 5, useNativeDriver: true }),
         ]),
         burstSymbol(symbolScale, symbolOpacity),
       ]).start();
+      if (mood === 'power') {
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(ringScale, { toValue: 1.2, duration: 350, useNativeDriver: true }),
+            Animated.timing(ringScale, { toValue: 1, duration: 350, useNativeDriver: true }),
+          ]),
+          { iterations: 4 }
+        ).start();
+      }
     }
 
-    if (mood === 'encourage') {
+    if (mood === 'encourage' || mood === 'practice') {
       Animated.sequence([
-        Animated.timing(scale, { toValue: 0.92, duration: 100, useNativeDriver: true }),
-        Animated.spring(scale, { toValue: 1, friction: 4, useNativeDriver: true }),
+        Animated.timing(scale, { toValue: 0.94, duration: 120, useNativeDriver: true }),
+        Animated.spring(scale, { toValue: 1, friction: 5, useNativeDriver: true }),
       ]).start();
     }
-  }, [mood, scale, symbolScale, symbolOpacity]);
+
+    if (mood === 'teach') {
+      Animated.sequence([
+        Animated.timing(floatY, { toValue: -4, duration: 200, useNativeDriver: true }),
+        Animated.timing(floatY, { toValue: 4, duration: 200, useNativeDriver: true }),
+        Animated.timing(floatY, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]).start();
+    }
+
+    if (mood === 'present') {
+      Animated.spring(scale, { toValue: 1.08, friction: 4, useNativeDriver: true }).start();
+    }
+  }, [mood, scale, symbolScale, symbolOpacity, ringScale, floatY]);
 
   const handlePress = () => {
     Animated.parallel([

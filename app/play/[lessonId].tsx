@@ -1,20 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { FeedbackBanner } from '@/components/FeedbackBanner';
-import { HeroAvatar, HeroMood } from '@/components/HeroAvatar';
+import { HeroAvatar } from '@/components/HeroAvatar';
 import { HeroLessonStage, LessonPhase } from '@/components/HeroLessonStage';
 import { MicButton } from '@/components/MicButton';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { COLORS } from '@/constants';
+import {
+  getHeroFeedbackSpeech,
+  HeroReactionTier,
+  scoreToTier,
+} from '@/constants/heroReactions';
+import { getLanguage } from '@/constants/languages';
 import { getSuperHero } from '@/constants/heroes';
 import { getLessonById, LESSONS } from '@/data/lessons';
-import { useAudioRecorder } from '@/hooks/useAudioRecorder';
+import { usePronunciationMic } from '@/hooks/usePronunciationMic';
 import {
   speakFeedback,
-  speakHeroLesson,
-  speakHeroLine,
+  speakHeroPresentsCard,
+  speakHeroReaction,
   speakWordOnly,
 } from '@/hooks/useSpeech';
 import { PronunciationService } from '@/services/pronunciation';
@@ -26,126 +32,170 @@ export function generateStaticParams() {
 }
 
 export default function PlayScreen() {
-  const { lessonId, language, hero } = useLocalSearchParams<{
+  const { lessonId, language, hero, name } = useLocalSearchParams<{
     lessonId: string;
     language: string;
     hero?: string;
+    name?: string;
   }>();
   const languageId = (language ?? 'en') as LanguageId;
+  const studentName = name ?? 'Herói';
   const superHero = getSuperHero(hero ?? 'spider-man');
+  const lang = getLanguage(languageId);
   const lesson = getLessonById(lessonId ?? '', languageId);
 
   const [wordIndex, setWordIndex] = useState(0);
   const [feedback, setFeedback] = useState<PronunciationFeedback | null>(null);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [lessonComplete, setLessonComplete] = useState(false);
-  const [heroMood, setHeroMood] = useState<HeroMood>('idle');
-  const [phase, setPhase] = useState<LessonPhase>('hero_speaking');
+  const [heroMood, setHeroMood] = useState<'idle' | 'power' | 'teach' | 'practice' | 'present'>('idle');
+  const [phase, setPhase] = useState<LessonPhase>('presenting');
   const [heroLine, setHeroLine] = useState('');
+  const [reactionTier, setReactionTier] = useState<HeroReactionTier | null>(null);
+  const [showEffects, setShowEffects] = useState(false);
 
-  const { isRecording, error, startRecording, stopRecording, reset } = useAudioRecorder();
+  const { isListening, error: micError, listen, reset: resetMic, isSupported } =
+    usePronunciationMic(languageId);
 
   const currentWord = lesson?.words[wordIndex];
   const isLastWord = lesson ? wordIndex >= lesson.words.length - 1 : false;
   const progress = lesson ? `${wordIndex + 1} / ${lesson.words.length}` : '';
 
-  const startHeroTurn = useCallback(() => {
+  const runHeroPresentation = useCallback(() => {
     if (!currentWord) return;
 
     setFeedback(null);
-    setPhase('hero_speaking');
-    setHeroMood('idle');
-    setHeroLine(
-      `${superHero.name}: Olha! É ${currentWord.translation}! ${currentWord.emoji} Repete comigo: "${currentWord.text}"`
-    );
+    setReactionTier(null);
+    setShowEffects(false);
+    setHeroMood('present');
+    setPhase('presenting');
+    setHeroLine(`${superHero.name} está revelando o cartão: ${currentWord.translation} ${currentWord.emoji}`);
 
-    speakHeroLesson(
-      superHero.name,
-      currentWord.translation,
-      currentWord.text,
-      languageId,
-      () => {
-        setPhase('your_turn');
-        setHeroLine(`Agora é sua vez! Toca no microfone e fala: "${currentWord.text}"`);
-      }
-    );
-  }, [currentWord, languageId, superHero.name]);
+    setTimeout(() => {
+      setPhase('hero_speaking');
+      setHeroLine(
+        `${superHero.name}: Olha! É ${currentWord.translation}! Ouve em ${lang.label.toLowerCase()}: "${currentWord.text}"`
+      );
+
+      speakHeroPresentsCard(
+        currentWord.translation,
+        currentWord.text,
+        languageId,
+        () => {
+          setHeroMood('idle');
+          setPhase('your_turn');
+          setHeroLine(
+            `Agora é sua vez, ${studentName}! Toca no microfone 🎤 e repete: "${currentWord.text}"`
+          );
+        }
+      );
+    }, 900);
+  }, [currentWord, languageId, superHero.name, studentName, lang.label]);
 
   useEffect(() => {
-    startHeroTurn();
-  }, [startHeroTurn]);
+    runHeroPresentation();
+  }, [runHeroPresentation]);
+
+  const applyHeroReaction = useCallback(
+    (tier: HeroReactionTier, result: PronunciationFeedback) => {
+      const { line, speakWordAfter } = getHeroFeedbackSpeech(
+        superHero.id,
+        superHero.name,
+        studentName,
+        tier
+      );
+
+      setReactionTier(tier);
+      setShowEffects(true);
+      setHeroMood(tier);
+      setPhase('feedback');
+      setHeroLine(line);
+
+      speakHeroReaction(
+        line,
+        tier,
+        speakWordAfter ? currentWord!.text : undefined,
+        languageId
+      );
+
+      setTimeout(() => {
+        setShowEffects(false);
+        setHeroMood('idle');
+      }, tier === 'power' ? 3500 : 2500);
+    },
+    [superHero, studentName, currentWord, languageId]
+  );
 
   const handleMicPress = useCallback(async () => {
-    if (isEvaluating || phase === 'hero_speaking') return;
+    if (isEvaluating || phase === 'hero_speaking' || phase === 'presenting') return;
 
-    if (isRecording) {
-      setIsEvaluating(true);
-      setPhase('listening');
-      setHeroLine(`${superHero.name} está ouvindo você...`);
+    setIsEvaluating(true);
+    setFeedback(null);
+    setShowEffects(false);
+    setPhase('listening');
+    setHeroLine(`${superHero.name} está ouvindo você, ${studentName}...`);
+    resetMic();
 
-      const uri = await stopRecording();
+    const transcripts = await listen();
 
-      if (uri && currentWord) {
-        const result = await PronunciationService.evaluateFromAudio(currentWord.text, uri);
-        setFeedback(result);
-        setPhase('feedback');
-
-        if (result.result === 'excellent') {
-          setHeroMood('happy');
-          setHeroLine(`${superHero.name}: ${superHero.cheer}`);
-          speakHeroLine(superHero.cheer);
-        } else {
-          setHeroMood('encourage');
-          const line = `${superHero.name}: ${superHero.encourage} (${result.message})`;
-          setHeroLine(line);
-          speakHeroLine(`${superHero.encourage} ${result.message}`);
-        }
-        setTimeout(() => setHeroMood('idle'), 1500);
-      } else {
-        setPhase('your_turn');
-        setHeroLine('Não ouvi bem. Tenta de novo!');
-      }
-      setIsEvaluating(false);
+    if (transcripts && currentWord) {
+      const result = PronunciationService.evaluateAlternatives(
+        currentWord.text,
+        transcripts
+      );
+      setFeedback(result);
+      const tier = scoreToTier(result.score);
+      applyHeroReaction(tier, result);
     } else {
-      setFeedback(null);
-      reset();
-      setPhase('listening');
-      setHeroLine('Fala agora! O herói está ouvindo...');
-      await startRecording();
+      setPhase('your_turn');
+      setHeroLine(`Não ouvi bem, ${studentName}. Toca no microfone e fala mais alto!`);
     }
+
+    setIsEvaluating(false);
   }, [
-    isRecording,
     isEvaluating,
     phase,
     currentWord,
-    startRecording,
-    stopRecording,
-    reset,
-    superHero,
+    listen,
+    resetMic,
+    superHero.name,
+    studentName,
+    applyHeroReaction,
   ]);
 
   const handleHeroTap = useCallback(() => {
     if (!currentWord) return;
-    startHeroTurn();
-  }, [currentWord, startHeroTurn]);
+    runHeroPresentation();
+  }, [currentWord, runHeroPresentation]);
 
   const handleListen = useCallback(() => {
     if (!currentWord) return;
     speakWordOnly(currentWord.text, languageId);
   }, [currentWord, languageId]);
 
+  const handleRetry = useCallback(() => {
+    setFeedback(null);
+    setReactionTier(null);
+    setShowEffects(false);
+    setPhase('your_turn');
+    setHeroMood('idle');
+    setHeroLine(`Tenta de novo, ${studentName}! Fala: "${currentWord?.text}"`);
+  }, [studentName, currentWord]);
+
   const handleNext = useCallback(() => {
     if (!lesson) return;
     setFeedback(null);
+    setReactionTier(null);
+    setShowEffects(false);
     setHeroMood('idle');
-    reset();
+    resetMic();
     if (isLastWord) {
       setLessonComplete(true);
-      speakFeedback('Parabéns! Missão completa!');
+      speakFeedback(`Parabéns, ${studentName}! Missão completa!`);
     } else {
       setWordIndex((i) => i + 1);
     }
-  }, [lesson, isLastWord, reset]);
+  }, [lesson, isLastWord, resetMic, studentName]);
 
   if (!lesson || !currentWord) {
     return (
@@ -161,10 +211,12 @@ export default function PlayScreen() {
     return (
       <TechBackground>
         <View style={styles.center}>
-          <HeroAvatar heroId={superHero.id} size="xl" selected mood="happy" />
+          <HeroAvatar heroId={superHero.id} size="xl" selected mood="power" />
           <Text style={styles.finishEmoji}>🏆</Text>
           <Text style={styles.finishTitle}>Missão completa!</Text>
-          <Text style={styles.finishSubtitle}>{superHero.name} está orgulhoso de você!</Text>
+          <Text style={styles.finishSubtitle}>
+            {superHero.name} está orgulhoso de você, {studentName}!
+          </Text>
         </View>
       </TechBackground>
     );
@@ -172,12 +224,10 @@ export default function PlayScreen() {
 
   return (
     <TechBackground>
-      <View style={styles.container}>
-        <View style={styles.topBar}>
-          <Text style={styles.progress}>
-            {superHero.symbol} Missão {progress}
-          </Text>
-        </View>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Text style={styles.progress}>
+          {superHero.symbol} {studentName} · Missão {progress}
+        </Text>
 
         <HeroLessonStage
           hero={superHero}
@@ -185,6 +235,8 @@ export default function PlayScreen() {
           phase={phase}
           heroLine={heroLine}
           mood={heroMood}
+          reactionTier={reactionTier}
+          showEffects={showEffects}
           onHeroPress={handleHeroTap}
         />
 
@@ -193,17 +245,35 @@ export default function PlayScreen() {
             result={feedback.result}
             message={feedback.message}
             encouragement={feedback.encouragement}
+            score={feedback.score}
+            heard={feedback.heard}
+            target={feedback.target}
           />
         ) : null}
 
-        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {!isSupported && (
+          <Text style={styles.warnText}>
+            Use Chrome ou Edge e permita o microfone para análise de pronúncia.
+          </Text>
+        )}
+
+        {micError ? <Text style={styles.errorText}>{micError}</Text> : null}
 
         <View style={styles.actions}>
           {isEvaluating ? (
             <ActivityIndicator size="large" color={COLORS.primary} />
           ) : feedback ? (
             <View style={styles.feedbackActions}>
-              {feedback.result !== 'excellent' && (
+              {feedback.score < 70 && (
+                <TechButton
+                  label="Tentar de novo"
+                  emoji="🎤"
+                  variant="secondary"
+                  onPress={handleRetry}
+                  style={styles.actionBtn}
+                />
+              )}
+              {feedback.score < 70 && (
                 <TechButton
                   label="Herói fala de novo"
                   emoji="🔊"
@@ -213,8 +283,8 @@ export default function PlayScreen() {
                 />
               )}
               <TechButton
-                label={isLastWord ? 'Terminar' : 'Próxima palavra'}
-                emoji={isLastWord ? '🏆' : '➡️'}
+                label={isLastWord ? 'Terminar' : 'Próximo cartão'}
+                emoji={isLastWord ? '🏆' : '🃏'}
                 onPress={handleNext}
                 style={styles.actionBtn}
               />
@@ -222,9 +292,14 @@ export default function PlayScreen() {
           ) : (
             <>
               <MicButton
-                isRecording={isRecording}
+                isRecording={isListening || isEvaluating}
                 onPress={handleMicPress}
-                disabled={isEvaluating || phase === 'hero_speaking'}
+                disabled={
+                  isEvaluating ||
+                  phase === 'hero_speaking' ||
+                  phase === 'presenting' ||
+                  !isSupported
+                }
               />
               {phase === 'your_turn' && (
                 <TechButton
@@ -238,15 +313,15 @@ export default function PlayScreen() {
             </>
           )}
         </View>
-      </View>
+      </ScrollView>
     </TechBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 24,
+    paddingBottom: 48,
     alignItems: 'center',
   },
   center: {
@@ -256,27 +331,26 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 12,
   },
-  topBar: {
-    alignSelf: 'stretch',
-    marginBottom: 4,
-  },
   progress: {
     fontSize: 16,
     color: COLORS.textLight,
     fontWeight: '700',
     textAlign: 'center',
+    marginBottom: 8,
+    alignSelf: 'stretch',
   },
   actions: {
-    marginTop: 'auto',
-    paddingBottom: 32,
+    marginTop: 16,
     alignItems: 'center',
     minHeight: 160,
     justifyContent: 'center',
     gap: 12,
+    width: '100%',
   },
   feedbackActions: {
     gap: 12,
     alignItems: 'center',
+    width: '100%',
   },
   actionBtn: {
     minWidth: 220,
@@ -289,6 +363,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginTop: 8,
+  },
+  warnText: {
+    color: COLORS.warning,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: 12,
   },
   finishEmoji: {
     fontSize: 64,

@@ -10,7 +10,7 @@ export interface LanguageOption {
 }
 
 export const LANGUAGES: LanguageOption[] = [
-  { id: 'en', label: 'Inglês', nativeLabel: 'English', emoji: '🇬🇧', flag: '🇬🇧', speechLocale: 'en-US' },
+  { id: 'en', label: 'Inglês Americano', nativeLabel: 'American English', emoji: '🇺🇸', flag: '🇺🇸', speechLocale: 'en-US' },
   { id: 'de', label: 'Alemão', nativeLabel: 'Deutsch', emoji: '🇩🇪', flag: '🇩🇪', speechLocale: 'de-DE' },
   { id: 'it', label: 'Italiano', nativeLabel: 'Italiano', emoji: '🇮🇹', flag: '🇮🇹', speechLocale: 'it-IT' },
   { id: 'es', label: 'Espanhol', nativeLabel: 'Español', emoji: '🇪🇸', flag: '🇪🇸', speechLocale: 'es-ES' },
