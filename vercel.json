@@ -8,7 +8,7 @@
   "framework": null,
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/((?!_expo|heroes|favicon\\.ico|.*\\.png|.*\\.jpg|.*\\.webp).*)",
       "destination": "/"
     }
   ]

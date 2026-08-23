@@ -5,7 +5,7 @@ export type HeroId =
   | 'spider-man'
   | 'hulk'
   | 'thor'
-  | 'wolverine'
+  | 'captain-america'
   | 'wonder-woman';
 
 export interface SuperHero {
@@ -16,6 +16,9 @@ export interface SuperHero {
   secondary: string;
   accent: string;
   symbol: string;
+  greeting: string;
+  cheer: string;
+  encourage: string;
 }
 
 export const SUPER_HEROES: SuperHero[] = [
@@ -27,6 +30,9 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#FFD700',
     accent: '#00E5FF',
     symbol: '⚙️',
+    greeting: 'Eu sou o Homem de Ferro! Pronto para a missão?',
+    cheer: 'Genial! Tecnologia e coragem!',
+    encourage: 'Ativa o reator e tenta de novo!',
   },
   {
     id: 'batman',
@@ -36,6 +42,9 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#FFD700',
     accent: '#4A4A6A',
     symbol: '🦇',
+    greeting: 'Eu sou o Batman! Vamos treinar juntos.',
+    cheer: 'Justiça feita! Excelente!',
+    encourage: 'Na escuridão a gente aprende. Tenta outra vez!',
   },
   {
     id: 'superman',
@@ -45,6 +54,9 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#C62828',
     accent: '#FFD700',
     symbol: 'S',
+    greeting: 'Eu sou o Super-Homem! Força e coragem!',
+    cheer: 'Up, up and away! Perfeito!',
+    encourage: 'Todo herói erra. Levanta e repete!',
   },
   {
     id: 'spider-man',
@@ -54,6 +66,9 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#1565C0',
     accent: '#FFFFFF',
     symbol: '🕷️',
+    greeting: 'Eu sou o Homem-Aranha! Teia de palavras!',
+    cheer: 'Thwip! Arrasou demais!',
+    encourage: 'Com agilidade você consegue! Mais uma!',
   },
   {
     id: 'hulk',
@@ -63,6 +78,9 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#1B5E20',
     accent: '#A5D6A7',
     symbol: '💪',
+    greeting: 'Hulk esmaga palavras difíceis! Vamos!',
+    cheer: 'HULK FELIZ! Poder máximo!',
+    encourage: 'Hulk não desiste! Repete com força!',
   },
   {
     id: 'thor',
@@ -72,15 +90,21 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#FFD700',
     accent: '#90CAF9',
     symbol: '⚡',
+    greeting: 'Eu sou o Thor! Trovão de conhecimento!',
+    cheer: 'Por Asgard! Magnífico!',
+    encourage: 'Levanta o martelo e tenta de novo!',
   },
   {
-    id: 'wolverine',
-    name: 'Wolverine',
-    title: 'Garra de Aço',
-    primary: '#F9A825',
-    secondary: '#1565C0',
+    id: 'captain-america',
+    name: 'Capitão América',
+    title: 'Escudo e Coragem',
+    primary: '#1565C0',
+    secondary: '#C62828',
     accent: '#FFFFFF',
-    symbol: '🐺',
+    symbol: '🛡️',
+    greeting: 'Capitão América aqui! Pela liberdade de aprender!',
+    cheer: 'Escudo levantado! Missão cumprida!',
+    encourage: 'Heróis nunca desistem. Vamos juntos!',
   },
   {
     id: 'wonder-woman',
@@ -90,6 +114,9 @@ export const SUPER_HEROES: SuperHero[] = [
     secondary: '#FFD700',
     accent: '#1565C0',
     symbol: '⭐',
+    greeting: 'Eu sou a Mulher-Maravilha! Princesa guerreira!',
+    cheer: 'Lasso da verdade! Perfeito!',
+    encourage: 'Com coragem você vence. Tenta de novo!',
   },
 ];
 
@@ -97,7 +124,7 @@ export function getSuperHero(id: string): SuperHero {
   return SUPER_HEROES.find((h) => h.id === id) ?? SUPER_HEROES[3];
 }
 
-/** Caminho da imagem real do herói (pasta public/heroes/) */
+/** @deprecated Use getHeroImageSource from heroImages.ts */
 export function getHeroImageUri(heroId: HeroId | string): string {
   return `/heroes/${heroId}.png`;
 }

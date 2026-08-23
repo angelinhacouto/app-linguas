@@ -12,7 +12,7 @@ Coloque aqui **8 imagens PNG** com o rosto/personagem fiel ao original.
 | `spider-man.png` | Homem-Aranha |
 | `hulk.png` | Hulk |
 | `thor.png` | Thor |
-| `wolverine.png` | Wolverine |
+| `captain-america.png` | Capitão América |
 | `wonder-woman.png` | Mulher-Maravilha |
 
 ## Recomendações
