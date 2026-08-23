@@ -1,11 +1,40 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx expo export -p web",
+  "buildCommand": "npm run build:web",
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "devCommand": "expo",
   "cleanUrls": true,
   "framework": null,
+  "headers": [
+    {
+      "source": "/",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/_expo/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!_expo|heroes|favicon\\.ico|.*\\.png|.*\\.jpg|.*\\.webp).*)",
