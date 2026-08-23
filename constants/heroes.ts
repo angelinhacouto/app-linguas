@@ -96,3 +96,8 @@ export const SUPER_HEROES: SuperHero[] = [
 export function getSuperHero(id: string): SuperHero {
   return SUPER_HEROES.find((h) => h.id === id) ?? SUPER_HEROES[3];
 }
+
+/** Caminho da imagem real do herói (pasta public/heroes/) */
+export function getHeroImageUri(heroId: HeroId | string): string {
+  return `/heroes/${heroId}.png`;
+}

@@ -19,7 +19,7 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
         pressed && styles.pressed,
       ]}
     >
-      <HeroAvatar heroId={hero.id as HeroId} size="sm" selected={selected} />
+      <HeroAvatar heroId={hero.id as HeroId} size="md" selected={selected} />
       <Text style={[styles.name, selected && { color: hero.accent }]} numberOfLines={1}>
         {hero.name}
       </Text>
