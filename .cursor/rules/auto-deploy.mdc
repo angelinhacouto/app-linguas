@@ -1,0 +1,24 @@
+---
+description: Deploy automatico apos alteracoes no app
+alwaysApply: true
+---
+
+# Deploy automatico (GitHub + Vercel)
+
+Apos **qualquer alteracao** no codigo do app, publique automaticamente:
+
+1. Rode o deploy:
+   ```powershell
+   npm run deploy -- "Descricao curta da mudanca"
+   ```
+   Ou: `scripts\PUBLICAR.bat "Descricao"`
+
+2. Nao peça ao usuario para fazer push manualmente — faca voce mesmo via `npm run deploy`.
+
+3. O fluxo e: build web → commit → push main → Vercel publica sozinha.
+
+4. URL de producao: https://app-linguas.vercel.app
+
+5. Conta GitHub: `angelinhacouto`. Use `gh auth setup-git` se o push falhar.
+
+6. So faca commit/push quando houver alteracoes reais no projeto.

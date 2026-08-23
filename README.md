@@ -43,6 +43,24 @@ No navegador, acesse o endereço que aparecer no terminal (geralmente `http://lo
 
 > **Microfone na web:** use HTTPS ou `localhost`. O navegador pedirá permissão para gravar.
 
+## Deploy automatico
+
+Toda alteracao pode ser publicada com **um comando**:
+
+```powershell
+npm run deploy -- "Descricao da mudanca"
+```
+
+Ou duplo-clique em **`scripts/PUBLICAR.bat`**.
+
+Fluxo automatico:
+1. Build web (valida erros)
+2. Commit no Git
+3. Push para GitHub
+4. Vercel publica em ~1–2 min
+
+**Site:** https://app-linguas.vercel.app
+
 ## Deploy (GitHub + Vercel)
 
 A versão **web** pode ser publicada na Vercel com CI no GitHub.
