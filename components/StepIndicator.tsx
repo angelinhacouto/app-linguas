@@ -2,13 +2,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '@/constants';
 
 interface StepIndicatorProps {
-  current: 1 | 2 | 3;
+  current: 1 | 2 | 3 | 4;
   total?: number;
 }
 
-const LABELS = ['Idade', 'Nome', 'Idioma'];
+const LABELS = ['Idade', 'Nome', 'Herói', 'Idioma'];
 
-export function StepIndicator({ current, total = 3 }: StepIndicatorProps) {
+export function StepIndicator({ current, total = 4 }: StepIndicatorProps) {
   return (
     <View style={styles.container}>
       {Array.from({ length: total }, (_, i) => {
@@ -36,7 +36,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    marginBottom: 28,
+    marginBottom: 24,
+    flexWrap: 'wrap',
   },
   stepRow: {
     flexDirection: 'row',
@@ -44,11 +45,12 @@ const styles = StyleSheet.create({
   },
   stepItem: {
     alignItems: 'center',
+    width: 52,
   },
   dot: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: COLORS.card,
     borderWidth: 2,
     borderColor: COLORS.cardBorder,
@@ -64,25 +66,26 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.success,
   },
   dotText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '800',
     color: COLORS.text,
   },
   label: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textLight,
-    marginTop: 6,
+    marginTop: 4,
+    textAlign: 'center',
   },
   labelActive: {
     color: COLORS.primary,
     fontWeight: '700',
   },
   line: {
-    width: 32,
+    width: 16,
     height: 2,
     backgroundColor: COLORS.cardBorder,
-    marginHorizontal: 6,
-    marginTop: 17,
+    marginHorizontal: 2,
+    marginTop: 15,
   },
   lineDone: {
     backgroundColor: COLORS.success,

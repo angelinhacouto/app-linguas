@@ -2,16 +2,18 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { HeroAgeCard } from '@/components/HeroAgeCard';
+import { HeroSelectCard } from '@/components/HeroSelectCard';
 import { LanguageCard } from '@/components/LanguageCard';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { TechInput } from '@/components/TechInput';
 import { APP_NAME, COLORS, STUDENT_AGES } from '@/constants';
+import { HeroId, SUPER_HEROES } from '@/constants/heroes';
 import { LANGUAGES } from '@/constants/languages';
 import { AgeGroupId, LanguageId } from '@/types';
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function HomeScreen() {
   const [selectedAge, setSelectedAge] = useState<number>(4);
   const [ageGroupId, setAgeGroupId] = useState<AgeGroupId>('3-4');
   const [studentName, setStudentName] = useState('');
+  const [heroId, setHeroId] = useState<HeroId>('spider-man');
   const [language, setLanguage] = useState<LanguageId>('en');
 
   const handleAgeSelect = (age: number, groupId: AgeGroupId) => {
@@ -36,6 +39,7 @@ export default function HomeScreen() {
         age: String(selectedAge),
         ageGroup: ageGroupId,
         language,
+        hero: heroId,
       },
     });
   };
@@ -48,7 +52,6 @@ export default function HomeScreen() {
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.logoWrap}>
-            <Text style={styles.logoIcon}>🦸</Text>
             <Text style={styles.logoText}>{APP_NAME}</Text>
             <Text style={styles.tagline}>Academia de Línguas dos Super-Heróis</Text>
           </View>
@@ -58,7 +61,7 @@ export default function HomeScreen() {
           {step === 1 && (
             <View>
               <Text style={styles.title}>Qual a idade do herói?</Text>
-              <Text style={styles.subtitle}>Escolha a idade do aluno para a missão</Text>
+              <Text style={styles.subtitle}>Escolha a idade do aluno</Text>
               {STUDENT_AGES.map(({ age, ageGroupId: groupId }) => (
                 <HeroAgeCard
                   key={age}
@@ -68,12 +71,7 @@ export default function HomeScreen() {
                   onPress={() => handleAgeSelect(age, groupId)}
                 />
               ))}
-              <TechButton
-                label="Continuar"
-                emoji="➡️"
-                onPress={() => setStep(2)}
-                style={styles.button}
-              />
+              <TechButton label="Continuar" emoji="➡️" onPress={() => setStep(2)} style={styles.button} />
             </View>
           )}
 
@@ -88,12 +86,7 @@ export default function HomeScreen() {
                 placeholder="Ex: Maria, João..."
               />
               <View style={styles.row}>
-                <TechButton
-                  label="Voltar"
-                  variant="secondary"
-                  onPress={() => setStep(1)}
-                  style={styles.halfButton}
-                />
+                <TechButton label="Voltar" variant="secondary" onPress={() => setStep(1)} style={styles.halfButton} />
                 <TechButton
                   label="Continuar"
                   emoji="➡️"
@@ -107,6 +100,27 @@ export default function HomeScreen() {
 
           {step === 3 && (
             <View>
+              <Text style={styles.title}>Escolha seu super-herói!</Text>
+              <Text style={styles.subtitle}>Seu mentor nas missões de idiomas</Text>
+              <View style={styles.heroGrid}>
+                {SUPER_HEROES.map((hero) => (
+                  <HeroSelectCard
+                    key={hero.id}
+                    hero={hero}
+                    selected={heroId === hero.id}
+                    onPress={() => setHeroId(hero.id)}
+                  />
+                ))}
+              </View>
+              <View style={styles.row}>
+                <TechButton label="Voltar" variant="secondary" onPress={() => setStep(2)} style={styles.halfButton} />
+                <TechButton label="Continuar" emoji="➡️" onPress={() => setStep(4)} style={styles.halfButton} />
+              </View>
+            </View>
+          )}
+
+          {step === 4 && (
+            <View>
               <Text style={styles.title}>Qual idioma aprender?</Text>
               <Text style={styles.subtitle}>Escolha a língua da missão</Text>
               {LANGUAGES.map((lang) => (
@@ -118,18 +132,8 @@ export default function HomeScreen() {
                 />
               ))}
               <View style={styles.row}>
-                <TechButton
-                  label="Voltar"
-                  variant="secondary"
-                  onPress={() => setStep(2)}
-                  style={styles.halfButton}
-                />
-                <TechButton
-                  label="Iniciar missão!"
-                  emoji="🚀"
-                  onPress={goToLearn}
-                  style={styles.halfButton}
-                />
+                <TechButton label="Voltar" variant="secondary" onPress={() => setStep(3)} style={styles.halfButton} />
+                <TechButton label="Iniciar missão!" emoji="🚀" onPress={goToLearn} style={styles.halfButton} />
               </View>
             </View>
           )}
@@ -141,56 +145,35 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  container: {
-    padding: 24,
-    paddingBottom: 48,
-  },
-  logoWrap: {
-    alignItems: 'center',
-    marginBottom: 8,
-    marginTop: 8,
-  },
-  logoIcon: {
-    fontSize: 56,
-  },
+  container: { padding: 24, paddingBottom: 48 },
+  logoWrap: { alignItems: 'center', marginBottom: 8, marginTop: 8 },
   logoText: {
     fontSize: 28,
     fontWeight: '900',
     color: COLORS.primary,
     letterSpacing: 2,
-    marginTop: 4,
   },
-  tagline: {
-    fontSize: 13,
-    color: COLORS.textLight,
-    marginTop: 6,
-    textAlign: 'center',
-  },
+  tagline: { fontSize: 13, color: COLORS.textLight, marginTop: 6, textAlign: 'center' },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '800',
     color: COLORS.text,
     textAlign: 'center',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: COLORS.textLight,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
-  button: {
-    alignSelf: 'center',
-    marginTop: 8,
-  },
-  row: {
+  heroGrid: {
     flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'center',
-    marginTop: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  halfButton: {
-    minWidth: 150,
-    flex: 1,
-  },
+  button: { alignSelf: 'center', marginTop: 8 },
+  row: { flexDirection: 'row', gap: 12, justifyContent: 'center', marginTop: 8 },
+  halfButton: { minWidth: 140, flex: 1 },
 });

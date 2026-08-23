@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { HeroAvatar } from '@/components/HeroAvatar';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { FeedbackBanner } from '@/components/FeedbackBanner';
 import { MicButton } from '@/components/MicButton';
 import { WordDisplay } from '@/components/WordDisplay';
 import { COLORS } from '@/constants';
+import { getSuperHero } from '@/constants/heroes';
 import { getLessonById, LESSONS } from '@/data/lessons';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { speakFeedback, speakInstruction, speakWord } from '@/hooks/useSpeech';
@@ -19,11 +21,13 @@ export function generateStaticParams() {
 }
 
 export default function PlayScreen() {
-  const { lessonId, language } = useLocalSearchParams<{
+  const { lessonId, language, hero } = useLocalSearchParams<{
     lessonId: string;
     language: string;
+    hero?: string;
   }>();
   const languageId = (language ?? 'en') as LanguageId;
+  const superHero = getSuperHero(hero ?? 'spider-man');
   const lesson = getLessonById(lessonId ?? '', languageId);
 
   const [wordIndex, setWordIndex] = useState(0);
@@ -111,7 +115,10 @@ export default function PlayScreen() {
   return (
     <TechBackground>
       <View style={styles.container}>
-        <Text style={styles.progress}>Missão {progress}</Text>
+        <View style={styles.topBar}>
+          <HeroAvatar heroId={superHero.id} size="sm" />
+          <Text style={styles.progress}>Missão {progress}</Text>
+        </View>
 
       <WordDisplay word={currentWord} onListen={handleListen} />
 
@@ -174,6 +181,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    alignSelf: 'stretch',
+    marginBottom: 8,
   },
   progress: {
     fontSize: 16,
