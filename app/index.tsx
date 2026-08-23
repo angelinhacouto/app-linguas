@@ -39,13 +39,11 @@ export default function HomeScreen() {
 
   const handleHeroSelect = useCallback((id: HeroId) => {
     setHeroId(id);
-    handlePlayMusic();
-  }, [handlePlayMusic]);
+  }, []);
 
-  const handleStartMission = useCallback(async () => {
-    await handlePlayMusic();
+  const handleStartMission = useCallback(() => {
     setStep(2);
-  }, [handlePlayMusic]);
+  }, []);
 
   const handleAgeSelect = (age: number, groupId: AgeGroupId) => {
     setSelectedAge(age);

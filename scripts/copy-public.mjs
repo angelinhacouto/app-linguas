@@ -26,11 +26,18 @@ copyDir(publicDir, distDir);
 
 const indexPath = path.join(distDir, 'index.html');
 if (existsSync(indexPath)) {
-  const html = readFileSync(indexPath, 'utf8');
-  const stamp = `<meta name="app-version" content="${Date.now()}" />`;
+  const stamp = Date.now();
+  let html = readFileSync(indexPath, 'utf8');
   if (!html.includes('app-version')) {
-    writeFileSync(indexPath, html.replace('</head>', `  ${stamp}\n  </head>`));
+    html = html.replace('</head>', `  <meta name="app-version" content="${stamp}" />\n  </head>`);
+  } else {
+    html = html.replace(/content="\d+"/, `content="${stamp}"`);
   }
+  html = html.replace(
+    /(src="\/_expo\/static\/js\/web\/entry-[^"?]+\.js)(?:\?[^"]*)?(")/,
+    `$1?v=${stamp}$2`
+  );
+  writeFileSync(indexPath, html);
 }
 
 console.log('✓ public/ copiado para dist/');

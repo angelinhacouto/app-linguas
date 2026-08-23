@@ -1,13 +1,17 @@
 import { playEpicFanfare } from '@/services/epicFanfare.web';
 
 export function useOpeningMusic(_active: boolean) {
-  // Web: trilha só após interação do usuário (política dos navegadores)
+  // Web: só toca após clique (política do navegador)
 }
 
 export async function stopOpeningMusic() {
-  // Fanfare curta — não precisa parar
+  // Fanfarra curta — nada a parar
 }
 
 export async function playOpeningMusicOnInteraction(): Promise<boolean> {
-  return playEpicFanfare();
+  try {
+    return await playEpicFanfare();
+  } catch {
+    return false;
+  }
 }

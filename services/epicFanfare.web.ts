@@ -1,41 +1,54 @@
-/** Trilha épica sintetizada — funciona no navegador sem arquivo externo */
-export function playEpicFanfare(): boolean {
-  if (typeof window === 'undefined') return false;
+/** Fanfarra épica via Web Audio — precisa de toque do usuário */
+let sharedCtx: AudioContext | null = null;
 
+function getCtx(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
   const AudioCtx =
     window.AudioContext ||
     (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtx) return null;
+  if (!sharedCtx || sharedCtx.state === 'closed') {
+    sharedCtx = new AudioCtx();
+  }
+  return sharedCtx;
+}
 
-  if (!AudioCtx) return false;
+export async function playEpicFanfare(): Promise<boolean> {
+  const ctx = getCtx();
+  if (!ctx) return false;
 
-  const ctx = new AudioCtx();
+  try {
+    if (ctx.state === 'suspended') {
+      await ctx.resume();
+    }
+  } catch {
+    return false;
+  }
 
-  const now = ctx.currentTime;
+  const now = ctx.currentTime + 0.02;
 
-  // Baixo épico
-  playTone(ctx, 65.41, 'sine', now, 0.35, 2.8, 0.22);
-  playTone(ctx, 82.41, 'sine', now + 0.15, 0.3, 2.5, 0.18);
+  // Intro dramática (timpani + brass)
+  playTone(ctx, 55, 'sine', now, 0.9, 0.45, 0.55);
+  playTone(ctx, 110, 'triangle', now + 0.05, 0.7, 0.4, 0.35);
+  playNoise(ctx, now, 0.35, 0.25);
 
-  // Acordes heroicos (Do → Mi → Sol → Do agudo)
-  const chords = [261.63, 329.63, 392.0, 523.25];
-  chords.forEach((freq, i) => {
-    playTone(ctx, freq, i === 3 ? 'triangle' : 'sawtooth', now + 0.1 + i * 0.12, 0.28, 2.2 - i * 0.1, 0.12);
-    playTone(ctx, freq * 2, 'square', now + 0.1 + i * 0.12, 0.08, 1.5, 0.04);
+  // Fanfarra ascendente
+  const melody = [261.63, 329.63, 392.0, 523.25, 659.25, 783.99];
+  melody.forEach((freq, i) => {
+    const t = now + 0.35 + i * 0.18;
+    playTone(ctx, freq, 'sawtooth', t, 0.55, 0.55, 0.28);
+    playTone(ctx, freq * 2, 'triangle', t, 0.35, 0.45, 0.12);
+    playTone(ctx, freq / 2, 'sine', t, 0.4, 0.5, 0.2);
   });
 
-  // Cymbal / brilho
-  playNoise(ctx, now + 0.05, 0.5, 0.08);
-  playNoise(ctx, now + 0.55, 0.8, 0.06);
-  playNoise(ctx, now + 1.0, 1.2, 0.05);
-
-  // Fanfarra final
-  playTone(ctx, 523.25, 'triangle', now + 1.1, 0.35, 1.8, 0.16);
-  playTone(ctx, 659.25, 'triangle', now + 1.25, 0.32, 1.6, 0.14);
-  playTone(ctx, 783.99, 'triangle', now + 1.4, 0.3, 2.0, 0.12);
-
-  window.setTimeout(() => {
-    ctx.close().catch(() => undefined);
-  }, 3500);
+  // Acorde final heróico
+  const finale = now + 1.55;
+  [261.63, 329.63, 392.0, 523.25].forEach((freq) => {
+    playTone(ctx, freq, 'sawtooth', finale, 0.7, 1.4, 0.22);
+    playTone(ctx, freq * 2, 'triangle', finale, 0.5, 1.2, 0.1);
+  });
+  playNoise(ctx, finale, 0.6, 0.2);
+  playTone(ctx, 65.41, 'sine', finale, 0.8, 1.6, 0.45);
 
   return true;
 }
@@ -53,17 +66,18 @@ function playTone(
   const gain = ctx.createGain();
   osc.type = type;
   osc.frequency.setValueAtTime(freq, start);
+  const level = Math.min(peak * volume, 0.85);
   gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(Math.max(peak * volume, 0.0001), start + 0.04);
+  gain.gain.exponentialRampToValueAtTime(Math.max(level, 0.0001), start + 0.03);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   osc.connect(gain);
   gain.connect(ctx.destination);
   osc.start(start);
-  osc.stop(start + duration + 0.05);
+  osc.stop(start + duration + 0.08);
 }
 
 function playNoise(ctx: AudioContext, start: number, duration: number, volume: number) {
-  const bufferSize = ctx.sampleRate * duration;
+  const bufferSize = Math.floor(ctx.sampleRate * duration);
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
   for (let i = 0; i < bufferSize; i++) {
@@ -72,10 +86,11 @@ function playNoise(ctx: AudioContext, start: number, duration: number, volume: n
   const source = ctx.createBufferSource();
   const gain = ctx.createGain();
   const filter = ctx.createBiquadFilter();
-  filter.type = 'highpass';
-  filter.frequency.value = 4000;
+  filter.type = 'bandpass';
+  filter.frequency.value = 2500;
+  filter.Q.value = 0.7;
   source.buffer = buffer;
-  gain.gain.setValueAtTime(volume, start);
+  gain.gain.setValueAtTime(Math.min(volume, 0.4), start);
   gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   source.connect(filter);
   filter.connect(gain);

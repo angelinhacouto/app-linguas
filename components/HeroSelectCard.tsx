@@ -1,10 +1,11 @@
-import { Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '@/constants';
 import { getHeroImageSource } from '@/constants/heroImages';
 import { HeroId, SuperHero } from '@/constants/heroes';
 import { speakHeroLine } from '@/hooks/useSpeech';
 
-const AVATAR_SIZE = 92;
+const AVATAR = 100;
 
 interface HeroSelectCardProps {
   hero: SuperHero;
@@ -13,107 +14,102 @@ interface HeroSelectCardProps {
 }
 
 export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps) {
+  const [imgFailed, setImgFailed] = useState(false);
+
   const handlePress = () => {
     onPress();
     speakHeroLine(hero.greeting);
   };
 
   return (
-    <View style={styles.cardWrap}>
-      <Pressable
-        onPress={handlePress}
-        style={({ pressed }) => [
-          styles.card,
-          { borderColor: selected ? hero.accent : COLORS.cardBorder },
-          selected && styles.cardSelected,
-          pressed && styles.cardPressed,
-        ]}
-      >
-        <View
-          style={[
-            styles.avatarRing,
-            { borderColor: selected ? hero.accent : COLORS.cardBorder },
-          ]}
-        >
+    <Pressable
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.card,
+        {
+          borderColor: selected ? hero.accent : COLORS.cardBorder,
+          backgroundColor: selected ? COLORS.backgroundLight : COLORS.card,
+        },
+        pressed && styles.pressed,
+      ]}
+    >
+      <View style={[styles.avatarBg, { backgroundColor: hero.primary, borderColor: hero.accent }]}>
+        {!imgFailed ? (
           <Image
             source={getHeroImageSource(hero.id as HeroId)}
-            style={[
-              styles.avatar,
-              Platform.OS === 'web' && ({ imageRendering: 'auto' } as object),
-            ]}
+            style={styles.avatar}
             resizeMode="cover"
+            onError={() => setImgFailed(true)}
           />
-        </View>
-
-        {selected && (
-          <View style={[styles.checkBadge, { backgroundColor: hero.accent }]}>
-            <Text style={styles.checkText}>✓</Text>
-          </View>
+        ) : (
+          <Text style={styles.fallback}>{hero.symbol}</Text>
         )}
+      </View>
 
-        <Text style={[styles.name, selected && { color: hero.accent }]} numberOfLines={2}>
-          {hero.name}
-        </Text>
-        <Text style={styles.title} numberOfLines={1}>
-          {hero.title}
-        </Text>
-      </Pressable>
-    </View>
+      {selected ? (
+        <View style={[styles.badge, { backgroundColor: hero.accent }]}>
+          <Text style={styles.badgeText}>✓</Text>
+        </View>
+      ) : null}
+
+      <Text style={[styles.name, selected && { color: hero.accent }]} numberOfLines={2}>
+        {hero.name}
+      </Text>
+      <Text style={styles.title} numberOfLines={1}>
+        {hero.title}
+      </Text>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  cardWrap: {
-    width: '48%',
-    marginBottom: 14,
-  },
   card: {
-    backgroundColor: COLORS.card,
-    borderRadius: 18,
-    paddingVertical: 12,
+    width: '48%',
+    marginBottom: 12,
+    borderRadius: 16,
+    borderWidth: 2,
+    paddingTop: 14,
+    paddingBottom: 12,
     paddingHorizontal: 8,
     alignItems: 'center',
-    borderWidth: 2,
-    minHeight: 180,
+    minHeight: 190,
   },
-  cardSelected: {
-    backgroundColor: COLORS.backgroundLight,
+  pressed: {
+    opacity: 0.88,
   },
-  cardPressed: {
-    opacity: 0.9,
-  },
-  avatarRing: {
-    width: AVATAR_SIZE + 6,
-    height: AVATAR_SIZE + 6,
-    borderRadius: (AVATAR_SIZE + 6) / 2,
+  avatarBg: {
+    width: AVATAR,
+    height: AVATAR,
+    borderRadius: AVATAR / 2,
     borderWidth: 3,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 10,
-    backgroundColor: '#0A0E27',
   },
   avatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: AVATAR_SIZE / 2,
-    backgroundColor: '#1A2347',
+    width: AVATAR,
+    height: AVATAR,
   },
-  checkBadge: {
+  fallback: {
+    fontSize: 42,
+  },
+  badge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    top: 10,
+    right: 10,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: COLORS.background,
+    borderColor: '#0A0E27',
   },
-  checkText: {
+  badgeText: {
     color: '#fff',
-    fontSize: 13,
     fontWeight: '900',
+    fontSize: 14,
   },
   name: {
     fontSize: 14,
@@ -122,13 +118,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
     minHeight: 36,
-    paddingHorizontal: 4,
   },
   title: {
     fontSize: 11,
     color: COLORS.textLight,
     textAlign: 'center',
     marginTop: 2,
-    paddingHorizontal: 4,
   },
 });
