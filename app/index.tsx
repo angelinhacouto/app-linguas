@@ -13,7 +13,7 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.mascot}>🦉</Text>
+        <Text style={styles.mascot}>🔥</Text>
         <Text style={styles.title}>Olá, pequeno explorador!</Text>
         <Text style={styles.subtitle}>Escolhe a tua idade para começar</Text>
       </View>
