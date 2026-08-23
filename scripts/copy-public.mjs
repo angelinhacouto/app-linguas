@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, readdirSync } from 'fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -23,4 +23,14 @@ if (!existsSync(distDir)) {
 }
 
 copyDir(publicDir, distDir);
+
+const indexPath = path.join(distDir, 'index.html');
+if (existsSync(indexPath)) {
+  const html = readFileSync(indexPath, 'utf8');
+  const stamp = `<meta name="app-version" content="${Date.now()}" />`;
+  if (!html.includes('app-version')) {
+    writeFileSync(indexPath, html.replace('</head>', `  ${stamp}\n  </head>`));
+  }
+}
+
 console.log('✓ public/ copiado para dist/');

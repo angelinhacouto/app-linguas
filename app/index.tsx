@@ -29,9 +29,12 @@ export default function HomeScreen() {
   useOpeningMusic(step === 1);
 
   const handlePlayMusic = useCallback(async () => {
-    await playOpeningMusicOnInteraction();
-    setMusicPlaying(true);
-    setTimeout(() => setMusicPlaying(false), 12000);
+    const ok = await playOpeningMusicOnInteraction();
+    if (ok) {
+      setMusicPlaying(true);
+      setTimeout(() => setMusicPlaying(false), 3000);
+    }
+    return ok;
   }, []);
 
   const handleHeroSelect = useCallback((id: HeroId) => {

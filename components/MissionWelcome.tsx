@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { HeroSelectCard } from '@/components/HeroSelectCard';
 import { TechButton } from '@/components/TechButton';
@@ -8,7 +9,7 @@ interface MissionWelcomeProps {
   selectedHeroId: HeroId;
   onSelectHero: (id: HeroId) => void;
   onStart: () => void;
-  onPlayMusic?: () => void;
+  onPlayMusic?: () => Promise<boolean> | boolean;
   musicPlaying?: boolean;
 }
 
@@ -19,22 +20,51 @@ export function MissionWelcome({
   onPlayMusic,
   musicPlaying,
 }: MissionWelcomeProps) {
+  const [entered, setEntered] = useState(false);
   const selectedHero = SUPER_HEROES.find((h) => h.id === selectedHeroId);
+
+  const handleEnter = async () => {
+    await onPlayMusic?.();
+    setEntered(true);
+  };
+
+  if (!entered) {
+    return (
+      <View style={styles.enterWrap}>
+        <View style={styles.enterHeroes}>
+          {SUPER_HEROES.map((hero) => (
+            <View key={hero.id} style={[styles.enterDot, { borderColor: hero.accent }]}>
+              <Text style={styles.enterSymbol}>{hero.symbol}</Text>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.enterTitle}>Super-Heróis reunidos!</Text>
+        <Text style={styles.enterSub}>
+          Toque para ouvir a trilha épica e escolher seu mentor!
+        </Text>
+        <TechButton
+          label="Entrar na missão"
+          emoji="🎵"
+          onPress={handleEnter}
+          style={styles.enterBtn}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrap}>
       <View style={styles.heroBanner}>
-        <Text style={styles.bannerEmoji}>🦸‍♂️🦸‍♀️</Text>
-        <Text style={styles.headline}>Super-Heróis reunidos!</Text>
+        <Text style={styles.headline}>Escolha seu mentor!</Text>
         <Text style={styles.subhead}>
-          Escolha seu mentor e prepare-se para a missão de idiomas!
+          Toque no herói para ouvi-lo e selecioná-lo para a missão.
         </Text>
         {onPlayMusic && (
           <TechButton
-            label={musicPlaying ? 'Trilha épica tocando' : 'Ouvir trilha épica'}
+            label={musicPlaying ? '🎵 Trilha tocando...' : 'Ouvir trilha épica de novo'}
             emoji="🎵"
             variant="secondary"
-            onPress={onPlayMusic}
+            onPress={() => onPlayMusic()}
             style={styles.musicBtn}
           />
         )}
@@ -70,24 +100,63 @@ export function MissionWelcome({
 }
 
 const styles = StyleSheet.create({
+  enterWrap: {
+    alignItems: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 12,
+  },
+  enterHeroes: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 24,
+    maxWidth: 320,
+  },
+  enterDot: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    backgroundColor: COLORS.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  enterSymbol: {
+    fontSize: 20,
+  },
+  enterTitle: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  enterSub: {
+    fontSize: 15,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 28,
+    paddingHorizontal: 8,
+  },
+  enterBtn: {
+    minWidth: 260,
+  },
   wrap: {
     width: '100%',
   },
   heroBanner: {
     backgroundColor: COLORS.backgroundLight,
     borderRadius: 18,
-    padding: 18,
-    marginBottom: 18,
+    padding: 16,
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: COLORS.cardBorder,
     alignItems: 'center',
   },
-  bannerEmoji: {
-    fontSize: 28,
-    marginBottom: 8,
-  },
   headline: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
     color: COLORS.text,
     textAlign: 'center',
@@ -98,11 +167,10 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
     lineHeight: 20,
-    paddingHorizontal: 4,
   },
   musicBtn: {
-    marginTop: 14,
-    minWidth: 220,
+    marginTop: 12,
+    minWidth: 240,
   },
   grid: {
     flexDirection: 'row',

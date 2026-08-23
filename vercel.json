@@ -37,7 +37,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!_expo|heroes|favicon\\.ico|.*\\.png|.*\\.jpg|.*\\.webp).*)",
+      "source": "/((?!_expo|heroes|audio|favicon\\.ico|.*\\.png|.*\\.jpg|.*\\.webp|.*\\.mp3).*)",
       "destination": "/"
     }
   ]

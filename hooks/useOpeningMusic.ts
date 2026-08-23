@@ -69,7 +69,7 @@ export async function stopOpeningMusic() {
   globalSound = null;
 }
 
-export async function playOpeningMusicOnInteraction() {
+export async function playOpeningMusicOnInteraction(): Promise<boolean> {
   try {
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
@@ -88,7 +88,8 @@ export async function playOpeningMusicOnInteraction() {
       { shouldPlay: true, volume: 0.55, isLooping: false }
     );
     globalSound = sound;
+    return true;
   } catch {
-    // ignore
+    return false;
   }
 }
