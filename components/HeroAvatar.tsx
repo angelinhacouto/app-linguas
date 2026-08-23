@@ -236,6 +236,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
     overflow: 'hidden',
     backgroundColor: '#1A2347',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
@@ -248,7 +250,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   image: {
-    backgroundColor: '#1A2347',
+    backgroundColor: 'transparent',
   },
   placeholder: {
     flex: 1,
