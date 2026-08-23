@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { BigButton } from '@/components/BigButton';
+import { TechBackground } from '@/components/TechBackground';
+import { TechButton } from '@/components/TechButton';
 import { FeedbackBanner } from '@/components/FeedbackBanner';
 import { MicButton } from '@/components/MicButton';
 import { WordDisplay } from '@/components/WordDisplay';
@@ -82,25 +83,30 @@ export default function PlayScreen() {
 
   if (!lesson || !currentWord) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.errorText}>Lição não encontrada.</Text>
-      </View>
+      <TechBackground>
+        <View style={styles.center}>
+          <Text style={styles.errorText}>Missão não encontrada.</Text>
+        </View>
+      </TechBackground>
     );
   }
 
   if (lessonComplete) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.finishEmoji}>🏆</Text>
-        <Text style={styles.finishTitle}>Lição completa!</Text>
-        <Text style={styles.finishSubtitle}>Parabéns, campeão!</Text>
-      </View>
+      <TechBackground>
+        <View style={styles.center}>
+          <Text style={styles.finishEmoji}>🏆</Text>
+          <Text style={styles.finishTitle}>Missão completa!</Text>
+          <Text style={styles.finishSubtitle}>Poder máximo, herói!</Text>
+        </View>
+      </TechBackground>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.progress}>{progress}</Text>
+    <TechBackground>
+      <View style={styles.container}>
+        <Text style={styles.progress}>Missão {progress}</Text>
 
       <WordDisplay word={currentWord} onListen={handleListen} />
 
@@ -124,15 +130,15 @@ export default function PlayScreen() {
         ) : feedback ? (
           <View style={styles.feedbackActions}>
             {feedback.result !== 'excellent' && (
-              <BigButton
+              <TechButton
                 label="Ouvir de novo"
                 emoji="🔊"
-                color={COLORS.accent}
+                variant="secondary"
                 onPress={handleListen}
                 style={styles.actionBtn}
               />
             )}
-            <BigButton
+            <TechButton
               label={isLastWord ? 'Terminar' : 'Próxima'}
               emoji={isLastWord ? '🏆' : '➡️'}
               onPress={handleNext}
@@ -148,6 +154,7 @@ export default function PlayScreen() {
         )}
       </View>
     </View>
+    </TechBackground>
   );
 }
 

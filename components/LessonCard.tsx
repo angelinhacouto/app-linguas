@@ -13,10 +13,12 @@ export function LessonCard({ lesson, onPress }: LessonCardProps) {
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      <Text style={styles.emoji}>{lesson.emoji}</Text>
+      <View style={styles.iconWrap}>
+        <Text style={styles.emoji}>{lesson.emoji}</Text>
+      </View>
       <View style={styles.info}>
         <Text style={styles.title}>{lesson.title}</Text>
-        <Text style={styles.subtitle}>{lesson.words.length} palavras</Text>
+        <Text style={styles.subtitle}>{lesson.words.length} palavras · Missão</Text>
       </View>
       <Text style={styles.arrow}>▶</Text>
     </Pressable>
@@ -26,40 +28,45 @@ export function LessonCard({ lesson, onPress }: LessonCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 16,
+    padding: 18,
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
   },
   pressed: {
     transform: [{ scale: 0.98 }],
-    backgroundColor: '#F8F9FF',
+    borderColor: COLORS.primary,
+  },
+  iconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 12,
+    backgroundColor: COLORS.backgroundLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
   },
   emoji: {
-    fontSize: 48,
-    marginRight: 16,
+    fontSize: 28,
   },
   info: {
     flex: 1,
   },
   title: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textLight,
     marginTop: 4,
   },
   arrow: {
-    fontSize: 20,
+    fontSize: 18,
     color: COLORS.primary,
   },
 });

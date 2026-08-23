@@ -9,6 +9,11 @@ export interface AgeGroup {
   emoji: string;
 }
 
+export interface StudentAge {
+  age: number;
+  ageGroupId: AgeGroupId;
+}
+
 export interface Word {
   id: string;
   text: string;
@@ -33,4 +38,10 @@ export interface PronunciationFeedback {
   score: number;
   message: string;
   encouragement: string;
+}
+
+export interface StudentProfile {
+  name: string;
+  age: number;
+  ageGroupId: AgeGroupId;
 }

@@ -61,6 +61,6 @@ const styles = StyleSheet.create({
   listenText: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.text,
+    color: COLORS.background,
   },
 });

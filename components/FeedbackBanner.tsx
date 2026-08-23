@@ -12,9 +12,9 @@ const RESULT_CONFIG: Record<
   PronunciationResult,
   { emoji: string; color: string; bg: string }
 > = {
-  excellent: { emoji: '🎉', color: COLORS.success, bg: '#E8F5E9' },
-  good: { emoji: '👍', color: COLORS.warning, bg: '#FFF8E1' },
-  try_again: { emoji: '💪', color: COLORS.secondary, bg: '#FCE4EC' },
+  excellent: { emoji: '🦸', color: COLORS.success, bg: '#0D3320' },
+  good: { emoji: '⚡', color: COLORS.warning, bg: '#3D3200' },
+  try_again: { emoji: '💪', color: COLORS.secondary, bg: '#3D1020' },
 };
 
 export function FeedbackBanner({ result, message, encouragement }: FeedbackBannerProps) {
