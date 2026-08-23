@@ -7,13 +7,16 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build:web": "expo export -p web",
+    "build:web": "npx expo export -p web",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~4.0.1",
     "expo": "~52.0.0",
+    "expo-asset": "~11.0.5",
     "expo-av": "~15.0.2",
     "expo-constants": "~17.0.0",
+    "expo-font": "~13.0.4",
     "expo-linking": "~7.0.0",
     "expo-router": "~4.0.0",
     "expo-speech": "~13.0.0",
