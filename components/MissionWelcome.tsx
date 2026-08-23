@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { HeroAvatar } from '@/components/HeroAvatar';
 import { HeroSelectCard } from '@/components/HeroSelectCard';
 import { TechButton } from '@/components/TechButton';
 import { COLORS } from '@/constants';
@@ -9,33 +8,39 @@ interface MissionWelcomeProps {
   selectedHeroId: HeroId;
   onSelectHero: (id: HeroId) => void;
   onStart: () => void;
+  onPlayMusic?: () => void;
+  musicPlaying?: boolean;
 }
 
-export function MissionWelcome({ selectedHeroId, onSelectHero, onStart }: MissionWelcomeProps) {
+export function MissionWelcome({
+  selectedHeroId,
+  onSelectHero,
+  onStart,
+  onPlayMusic,
+  musicPlaying,
+}: MissionWelcomeProps) {
   const selectedHero = SUPER_HEROES.find((h) => h.id === selectedHeroId);
 
   return (
     <View style={styles.wrap}>
-      <View style={styles.heroLineup}>
-        {SUPER_HEROES.map((hero) => (
-          <View
-            key={hero.id}
-            style={[
-              styles.lineupAvatar,
-              selectedHeroId === hero.id && { borderColor: hero.accent },
-            ]}
-          >
-            <HeroAvatar heroId={hero.id} size="sm" selected={selectedHeroId === hero.id} />
-          </View>
-        ))}
+      <View style={styles.heroBanner}>
+        <Text style={styles.bannerEmoji}>🦸‍♂️🦸‍♀️</Text>
+        <Text style={styles.headline}>Super-Heróis reunidos!</Text>
+        <Text style={styles.subhead}>
+          Escolha seu mentor e prepare-se para a missão de idiomas!
+        </Text>
+        {onPlayMusic && (
+          <TechButton
+            label={musicPlaying ? 'Trilha épica tocando' : 'Ouvir trilha épica'}
+            emoji="🎵"
+            variant="secondary"
+            onPress={onPlayMusic}
+            style={styles.musicBtn}
+          />
+        )}
       </View>
 
-      <Text style={styles.headline}>Super-Heróis reunidos!</Text>
-      <Text style={styles.subhead}>
-        Uma nova missão de idiomas começa agora. Escolha seu mentor e partiu!
-      </Text>
-
-      <View style={styles.heroGrid}>
+      <View style={styles.grid}>
         {SUPER_HEROES.map((hero) => (
           <HeroSelectCard
             key={hero.id}
@@ -68,45 +73,43 @@ const styles = StyleSheet.create({
   wrap: {
     width: '100%',
   },
-  heroLineup: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 20,
-    paddingVertical: 14,
-    paddingHorizontal: 10,
+  heroBanner: {
     backgroundColor: COLORS.backgroundLight,
-    borderRadius: 16,
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: COLORS.cardBorder,
+    alignItems: 'center',
   },
-  lineupAvatar: {
-    borderRadius: 30,
-    borderWidth: 2,
-    borderColor: 'transparent',
-    padding: 2,
+  bannerEmoji: {
+    fontSize: 28,
+    marginBottom: 8,
   },
   headline: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: '900',
     color: COLORS.text,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subhead: {
     fontSize: 14,
     color: COLORS.textLight,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 20,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
-  heroGrid: {
+  musicBtn: {
+    marginTop: 14,
+    minWidth: 220,
+  },
+  grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    width: '100%',
+    marginBottom: 8,
   },
   missionBox: {
     backgroundColor: COLORS.card,
@@ -115,13 +118,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     borderWidth: 2,
+    width: '100%',
   },
   missionEmoji: {
     fontSize: 32,
     marginBottom: 6,
   },
   missionTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '800',
     color: COLORS.primary,
     textAlign: 'center',

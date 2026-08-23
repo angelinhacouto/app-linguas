@@ -13,26 +13,10 @@ interface HeroSelectCardProps {
 
 export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps) {
   const cardScale = useRef(new Animated.Value(1)).current;
-  const titleOpacity = useRef(new Animated.Value(selected ? 1 : 0.6)).current;
-
-  useEffect(() => {
-    Animated.timing(titleOpacity, {
-      toValue: selected ? 1 : 0.6,
-      duration: 250,
-      useNativeDriver: true,
-    }).start();
-
-    if (selected) {
-      Animated.sequence([
-        Animated.spring(cardScale, { toValue: 1.04, friction: 4, useNativeDriver: true }),
-        Animated.spring(cardScale, { toValue: 1, friction: 5, useNativeDriver: true }),
-      ]).start();
-    }
-  }, [selected, cardScale, titleOpacity]);
 
   const handlePress = () => {
     Animated.sequence([
-      Animated.spring(cardScale, { toValue: 0.94, friction: 6, useNativeDriver: true }),
+      Animated.spring(cardScale, { toValue: 0.96, friction: 6, useNativeDriver: true }),
       Animated.spring(cardScale, { toValue: 1, friction: 4, useNativeDriver: true }),
     ]).start();
     onPress();
@@ -43,31 +27,28 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
     <Animated.View style={[styles.cardWrap, { transform: [{ scale: cardScale }] }]}>
       <Pressable
         onPress={handlePress}
-        style={[
+        style={({ pressed }) => [
           styles.card,
-          selected && { borderColor: hero.accent, backgroundColor: COLORS.backgroundLight },
+          { borderColor: selected ? hero.accent : COLORS.cardBorder },
+          selected && styles.cardSelected,
+          pressed && styles.cardPressed,
         ]}
       >
-        <HeroAvatar
-          heroId={hero.id as HeroId}
-          size="md"
-          selected={selected}
-          interactive
-        />
-        <Animated.Text
-          style={[styles.name, selected && { color: hero.accent }, { opacity: titleOpacity }]}
-          numberOfLines={1}
-        >
+        <View style={styles.avatarSlot}>
+          <HeroAvatar heroId={hero.id as HeroId} size="sm" selected={selected} />
+          {selected && (
+            <View style={[styles.checkBadge, { backgroundColor: hero.accent }]}>
+              <Text style={styles.checkText}>✓</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={[styles.name, selected && { color: hero.accent }]} numberOfLines={2}>
           {hero.name}
-        </Animated.Text>
-        {selected && (
-          <View style={[styles.badge, { backgroundColor: hero.primary }]}>
-            <Text style={styles.badgeText}>{hero.symbol} Escolhido!</Text>
-          </View>
-        )}
-        {!selected && (
-          <Text style={styles.tapHint}>Toca para ouvir</Text>
-        )}
+        </Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {hero.title}
+        </Text>
       </Pressable>
     </Animated.View>
   );
@@ -75,38 +56,68 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
 
 const styles = StyleSheet.create({
   cardWrap: {
-    width: '47%',
-    marginBottom: 12,
+    width: '48%',
+    marginBottom: 14,
   },
   card: {
     backgroundColor: COLORS.card,
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: COLORS.cardBorder,
+    minHeight: 168,
+    justifyContent: 'flex-start',
+    overflow: 'visible',
+  },
+  cardSelected: {
+    backgroundColor: COLORS.backgroundLight,
+    shadowColor: COLORS.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  cardPressed: {
+    opacity: 0.92,
+  },
+  avatarSlot: {
+    width: 72,
+    height: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    overflow: 'visible',
+  },
+  checkBadge: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.background,
+  },
+  checkText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '900',
   },
   name: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  badge: {
-    marginTop: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  badgeText: {
-    fontSize: 10,
+    fontSize: 13,
     fontWeight: '800',
-    color: '#FFFFFF',
+    color: COLORS.text,
+    textAlign: 'center',
+    lineHeight: 17,
+    minHeight: 34,
   },
-  tapHint: {
-    fontSize: 9,
+  title: {
+    fontSize: 10,
     color: COLORS.textLight,
+    textAlign: 'center',
     marginTop: 4,
   },
 });

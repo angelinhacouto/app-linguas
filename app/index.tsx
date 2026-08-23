@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AgeCard } from '@/components/AgeCard';
@@ -11,6 +11,7 @@ import { TechInput } from '@/components/TechInput';
 import { APP_NAME, COLORS, STUDENT_AGES } from '@/constants';
 import { HeroId } from '@/constants/heroes';
 import { LANGUAGES } from '@/constants/languages';
+import { playOpeningMusicOnInteraction, stopOpeningMusic, useOpeningMusic } from '@/hooks/useOpeningMusic';
 import { AgeGroupId, LanguageId } from '@/types';
 
 type Step = 1 | 2 | 3 | 4;
@@ -23,6 +24,25 @@ export default function HomeScreen() {
   const [studentName, setStudentName] = useState('');
   const [heroId, setHeroId] = useState<HeroId>('spider-man');
   const [language, setLanguage] = useState<LanguageId>('en');
+  const [musicPlaying, setMusicPlaying] = useState(false);
+
+  useOpeningMusic(step === 1);
+
+  const handlePlayMusic = useCallback(async () => {
+    await playOpeningMusicOnInteraction();
+    setMusicPlaying(true);
+    setTimeout(() => setMusicPlaying(false), 12000);
+  }, []);
+
+  const handleHeroSelect = useCallback((id: HeroId) => {
+    setHeroId(id);
+    handlePlayMusic();
+  }, [handlePlayMusic]);
+
+  const handleStartMission = useCallback(async () => {
+    await handlePlayMusic();
+    setStep(2);
+  }, [handlePlayMusic]);
 
   const handleAgeSelect = (age: number, groupId: AgeGroupId) => {
     setSelectedAge(age);
@@ -32,6 +52,7 @@ export default function HomeScreen() {
   const goToLearn = () => {
     const name = studentName.trim();
     if (!name) return;
+    stopOpeningMusic();
     router.push({
       pathname: '/learn',
       params: {
@@ -61,8 +82,10 @@ export default function HomeScreen() {
           {step === 1 && (
             <MissionWelcome
               selectedHeroId={heroId}
-              onSelectHero={setHeroId}
-              onStart={() => setStep(2)}
+              onSelectHero={handleHeroSelect}
+              onStart={handleStartMission}
+              onPlayMusic={handlePlayMusic}
+              musicPlaying={musicPlaying}
             />
           )}
 
