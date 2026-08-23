@@ -2,14 +2,16 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { HeroAgeCard } from '@/components/HeroAgeCard';
+import { LanguageCard } from '@/components/LanguageCard';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { TechInput } from '@/components/TechInput';
 import { APP_NAME, COLORS, STUDENT_AGES } from '@/constants';
-import { AgeGroupId } from '@/types';
+import { LANGUAGES } from '@/constants/languages';
+import { AgeGroupId, LanguageId } from '@/types';
 
-type Step = 1 | 2;
+type Step = 1 | 2 | 3;
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function HomeScreen() {
   const [selectedAge, setSelectedAge] = useState<number>(4);
   const [ageGroupId, setAgeGroupId] = useState<AgeGroupId>('3-4');
   const [studentName, setStudentName] = useState('');
+  const [language, setLanguage] = useState<LanguageId>('en');
 
   const handleAgeSelect = (age: number, groupId: AgeGroupId) => {
     setSelectedAge(age);
@@ -28,7 +31,12 @@ export default function HomeScreen() {
     if (!name) return;
     router.push({
       pathname: '/learn',
-      params: { name, age: String(selectedAge), ageGroup: ageGroupId },
+      params: {
+        name,
+        age: String(selectedAge),
+        ageGroup: ageGroupId,
+        language,
+      },
     });
   };
 
@@ -45,7 +53,7 @@ export default function HomeScreen() {
             <Text style={styles.tagline}>Academia de Línguas dos Super-Heróis</Text>
           </View>
 
-          <StepIndicator current={step} total={2} />
+          <StepIndicator current={step} />
 
           {step === 1 && (
             <View>
@@ -87,10 +95,39 @@ export default function HomeScreen() {
                   style={styles.halfButton}
                 />
                 <TechButton
+                  label="Continuar"
+                  emoji="➡️"
+                  onPress={() => setStep(3)}
+                  disabled={studentName.trim().length < 2}
+                  style={styles.halfButton}
+                />
+              </View>
+            </View>
+          )}
+
+          {step === 3 && (
+            <View>
+              <Text style={styles.title}>Qual idioma aprender?</Text>
+              <Text style={styles.subtitle}>Escolha a língua da missão</Text>
+              {LANGUAGES.map((lang) => (
+                <LanguageCard
+                  key={lang.id}
+                  language={lang}
+                  selected={language === lang.id}
+                  onPress={() => setLanguage(lang.id)}
+                />
+              ))}
+              <View style={styles.row}>
+                <TechButton
+                  label="Voltar"
+                  variant="secondary"
+                  onPress={() => setStep(2)}
+                  style={styles.halfButton}
+                />
+                <TechButton
                   label="Iniciar missão!"
                   emoji="🚀"
                   onPress={goToLearn}
-                  disabled={studentName.trim().length < 2}
                   style={styles.halfButton}
                 />
               </View>
@@ -150,6 +187,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     justifyContent: 'center',
+    marginTop: 8,
   },
   halfButton: {
     minWidth: 150,

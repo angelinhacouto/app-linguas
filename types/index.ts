@@ -1,5 +1,7 @@
 export type AgeGroupId = '3-4' | '4-5' | '5-6';
 
+export type LanguageId = 'en' | 'de' | 'it' | 'es' | 'pt';
+
 export interface AgeGroup {
   id: AgeGroupId;
   label: string;
@@ -27,7 +29,7 @@ export interface Lesson {
   title: string;
   emoji: string;
   ageGroupId: AgeGroupId;
-  language: string;
+  language: LanguageId;
   words: Word[];
 }
 

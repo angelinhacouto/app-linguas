@@ -1,10 +1,11 @@
 import * as Speech from 'expo-speech';
 import { Platform } from 'react-native';
+import { getSpeechLocale } from '@/constants/languages';
 
-export function speakWord(word: string, language = 'en-US') {
+export function speakWord(word: string, languageId = 'en') {
   Speech.stop();
   Speech.speak(word, {
-    language,
+    language: getSpeechLocale(languageId),
     pitch: 1.1,
     rate: Platform.OS === 'web' ? 0.85 : 0.75,
   });

@@ -6,8 +6,9 @@ interface StepIndicatorProps {
   total?: number;
 }
 
-export function StepIndicator({ current, total = 2 }: StepIndicatorProps) {
-  const labels = ['Idade', 'Nome'];
+const LABELS = ['Idade', 'Nome', 'Idioma'];
+
+export function StepIndicator({ current, total = 3 }: StepIndicatorProps) {
   return (
     <View style={styles.container}>
       {Array.from({ length: total }, (_, i) => {
@@ -20,7 +21,7 @@ export function StepIndicator({ current, total = 2 }: StepIndicatorProps) {
               <View style={[styles.dot, active && styles.dotActive, done && styles.dotDone]}>
                 <Text style={styles.dotText}>{done ? '✓' : step}</Text>
               </View>
-              <Text style={[styles.label, active && styles.labelActive]}>{labels[i]}</Text>
+              <Text style={[styles.label, active && styles.labelActive]}>{LABELS[i]}</Text>
             </View>
             {step < total && <View style={[styles.line, done && styles.lineDone]} />}
           </View>
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   label: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textLight,
     marginTop: 6,
   },
@@ -77,10 +78,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   line: {
-    width: 48,
+    width: 32,
     height: 2,
     backgroundColor: COLORS.cardBorder,
-    marginHorizontal: 8,
+    marginHorizontal: 6,
     marginTop: 17,
   },
   lineDone: {

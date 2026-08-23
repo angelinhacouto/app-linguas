@@ -11,15 +11,20 @@ import { getLessonById, LESSONS } from '@/data/lessons';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { speakFeedback, speakInstruction, speakWord } from '@/hooks/useSpeech';
 import { PronunciationService } from '@/services/pronunciation';
-import { PronunciationFeedback } from '@/types';
+import { LanguageId, PronunciationFeedback } from '@/types';
 
 export function generateStaticParams() {
-  return LESSONS.map((lesson) => ({ lessonId: lesson.id }));
+  const ids = [...new Set(LESSONS.map((lesson) => lesson.id))];
+  return ids.map((lessonId) => ({ lessonId }));
 }
 
 export default function PlayScreen() {
-  const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
-  const lesson = getLessonById(lessonId ?? '');
+  const { lessonId, language } = useLocalSearchParams<{
+    lessonId: string;
+    language: string;
+  }>();
+  const languageId = (language ?? 'en') as LanguageId;
+  const lesson = getLessonById(lessonId ?? '', languageId);
 
   const [wordIndex, setWordIndex] = useState(0);
   const [feedback, setFeedback] = useState<PronunciationFeedback | null>(null);
@@ -36,11 +41,11 @@ export default function PlayScreen() {
     if (currentWord) {
       const timer = setTimeout(() => {
         speakInstruction(`Fala: ${currentWord.text}`);
-        setTimeout(() => speakWord(currentWord.text), 1500);
+        setTimeout(() => speakWord(currentWord.text, languageId), 1500);
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [currentWord]);
+  }, [currentWord, languageId]);
 
   const handleMicPress = useCallback(async () => {
     if (isEvaluating) return;
@@ -78,8 +83,8 @@ export default function PlayScreen() {
   }, [lesson, isLastWord, reset]);
 
   const handleListen = useCallback(() => {
-    if (currentWord) speakWord(currentWord.text);
-  }, [currentWord]);
+    if (currentWord) speakWord(currentWord.text, languageId);
+  }, [currentWord, languageId]);
 
   if (!lesson || !currentWord) {
     return (

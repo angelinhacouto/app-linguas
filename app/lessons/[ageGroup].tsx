@@ -3,17 +3,18 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LessonCard } from '@/components/LessonCard';
 import { getLessonsByAge } from '@/data/lessons';
 import { AGE_GROUPS, COLORS } from '@/constants';
-import { AgeGroupId } from '@/types';
+import { AgeGroupId, LanguageId } from '@/types';
 
 export function generateStaticParams() {
   return AGE_GROUPS.map((group) => ({ ageGroup: group.id }));
 }
 
-export default function LessonsScreen() {  const { ageGroup } = useLocalSearchParams<{ ageGroup: string }>();
+export default function LessonsScreen() {
+  const { ageGroup, language } = useLocalSearchParams<{ ageGroup: string; language?: string }>();
   const router = useRouter();
   const ageGroupId = (ageGroup ?? '3-4') as AgeGroupId;
-  const lessons = getLessonsByAge(ageGroupId);
-  const groupInfo = AGE_GROUPS.find((g) => g.id === ageGroupId);
+  const languageId = (language ?? 'en') as LanguageId;
+  const lessons = getLessonsByAge(ageGroupId, languageId);  const groupInfo = AGE_GROUPS.find((g) => g.id === ageGroupId);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -30,7 +31,12 @@ export default function LessonsScreen() {  const { ageGroup } = useLocalSearchPa
           <LessonCard
             key={lesson.id}
             lesson={lesson}
-            onPress={() => router.push(`/play/${lesson.id}`)}
+            onPress={() =>
+              router.push({
+                pathname: `/play/${lesson.id}`,
+                params: { language: languageId },
+              })
+            }
           />
         ))
       )}

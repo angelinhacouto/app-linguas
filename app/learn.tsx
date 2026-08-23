@@ -4,21 +4,25 @@ import { LessonCard } from '@/components/LessonCard';
 import { TechBackground } from '@/components/TechBackground';
 import { getLessonsByAge } from '@/data/lessons';
 import { COLORS, getHeroForAgeGroup } from '@/constants';
-import { AgeGroupId } from '@/types';
+import { getLanguage } from '@/constants/languages';
+import { AgeGroupId, LanguageId } from '@/types';
 
 export default function LearnScreen() {
-  const { name, age, ageGroup } = useLocalSearchParams<{
+  const { name, age, ageGroup, language } = useLocalSearchParams<{
     name: string;
     age: string;
     ageGroup: string;
+    language: string;
   }>();
   const router = useRouter();
 
   const studentName = name ?? 'Herói';
   const studentAge = age ?? '4';
   const ageGroupId = (ageGroup ?? '3-4') as AgeGroupId;
+  const languageId = (language ?? 'en') as LanguageId;
   const hero = getHeroForAgeGroup(ageGroupId);
-  const lessons = getLessonsByAge(ageGroupId);
+  const lang = getLanguage(languageId);
+  const lessons = getLessonsByAge(ageGroupId, languageId);
 
   return (
     <TechBackground>
@@ -31,14 +35,14 @@ export default function LearnScreen() {
               {hero.name} — {hero.title}
             </Text>
             <Text style={styles.meta}>
-              {studentAge} anos · Missões de inglês
+              {studentAge} anos · {lang.flag} {lang.label}
             </Text>
           </View>
         </View>
 
         <Text style={styles.sectionTitle}>🎯 Escolha sua missão</Text>
         <Text style={styles.sectionSub}>
-          Cada missão ensina palavras com seu super-herói mentor
+          Aprenda {lang.label.toLowerCase()} com seu super-herói mentor
         </Text>
 
         {lessons.map((lesson) => (
@@ -48,7 +52,11 @@ export default function LearnScreen() {
             onPress={() =>
               router.push({
                 pathname: `/play/${lesson.id}`,
-                params: { name: studentName, ageGroup: ageGroupId },
+                params: {
+                  name: studentName,
+                  ageGroup: ageGroupId,
+                  language: languageId,
+                },
               })
             }
           />
