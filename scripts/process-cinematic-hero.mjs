@@ -46,7 +46,7 @@ const PRESETS = {
     </svg>`,
   },
   batman: {
-    crop: { left: 18, top: 32, width: 215, height: 330 },
+    crop: { left: 0, top: 0, width: 258, height: 360 },
     out: 'batman.png',
     svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <defs>
