@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Image,
+  ImageStyle,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -37,6 +39,7 @@ export function HeroAvatar({
 }: HeroAvatarProps) {
   const hero = getSuperHero(heroId);
   const dim = SIZES[size];
+  const isIronMan = hero.id === 'ironman';
   const [failed, setFailed] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -129,6 +132,21 @@ export function HeroAvatar({
 
   const avatarBody = (
     <View style={[styles.stack, { width: dim, height: dim }, style]}>
+      {isIronMan && (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.arcGlow,
+            {
+              width: dim + 28,
+              height: dim + 28,
+              borderRadius: (dim + 28) / 2,
+              shadowColor: hero.accent,
+            },
+          ]}
+        />
+      )}
+
       {selected && isInteractive && (
         <Animated.View
           pointerEvents="none"
@@ -152,9 +170,11 @@ export function HeroAvatar({
             width: dim,
             height: dim,
             borderRadius: dim / 2,
-            backgroundColor: hero.primary,
+            backgroundColor: isIronMan ? '#0A0E27' : hero.primary,
+            shadowColor: isIronMan ? hero.accent : hero.primary,
           },
           selected && { borderColor: hero.accent },
+          isIronMan && styles.ironWrap,
           selected && styles.selected,
           {
             transform: [
@@ -167,7 +187,11 @@ export function HeroAvatar({
         {!failed ? (
           <Image
             source={getHeroImageSource(hero.id)}
-            style={[styles.image, { width: dim, height: dim, borderRadius: dim / 2 }]}
+            style={[
+              styles.image,
+              { width: dim, height: dim, borderRadius: dim / 2 },
+              isIronMan && Platform.OS === 'web' ? (styles.ironImageWeb as ImageStyle) : null,
+            ]}
             resizeMode="cover"
             onError={() => setFailed(true)}
           />
@@ -233,6 +257,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  arcGlow: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0,229,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,229,255,0.35)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.85,
+    shadowRadius: 18,
+    elevation: 12,
+  },
   glowRing: {
     position: 'absolute',
     borderWidth: 2,
@@ -256,9 +290,22 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 10,
   },
+  ironWrap: {
+    borderColor: 'rgba(0,229,255,0.55)',
+    borderWidth: 2,
+    shadowOpacity: 0.95,
+    shadowRadius: 20,
+  },
   image: {
     backgroundColor: 'transparent',
   },
+  ironImageWeb: Platform.select({
+    web: {
+      objectFit: 'cover',
+      objectPosition: '50% 38%',
+    } as ImageStyle,
+    default: {},
+  }),
   placeholder: {
     flex: 1,
     alignItems: 'center',
