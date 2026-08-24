@@ -17,7 +17,8 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
   const [imgFailed, setImgFailed] = useState(false);
   const isIronMan = hero.id === 'ironman';
   const isSpiderMan = hero.id === 'spider-man';
-  const isCinematic = isIronMan || isSpiderMan;
+  const isBatman = hero.id === 'batman';
+  const isCinematic = isIronMan || isSpiderMan || isBatman;
 
   const handlePress = () => {
     onPress();
@@ -43,8 +44,19 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
             backgroundColor: isCinematic ? '#0A0E27' : hero.primary,
             borderColor: selected || isCinematic ? hero.accent : COLORS.cardBorder,
           },
-          isCinematic && (isSpiderMan ? styles.spiderAvatarBg : styles.ironAvatarBg),
-          selected && isCinematic && (isSpiderMan ? styles.spiderAvatarSelected : styles.ironAvatarSelected),
+          isCinematic &&
+            (isSpiderMan
+              ? styles.spiderAvatarBg
+              : isBatman
+                ? styles.batmanAvatarBg
+                : styles.ironAvatarBg),
+          selected &&
+            isCinematic &&
+            (isSpiderMan
+              ? styles.spiderAvatarSelected
+              : isBatman
+                ? styles.batmanAvatarSelected
+                : styles.ironAvatarSelected),
         ]}
       >
         {!imgFailed ? (
@@ -123,6 +135,18 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   spiderAvatarSelected: {
+    borderWidth: 3,
+    shadowOpacity: 1,
+    shadowRadius: 20,
+  },
+  batmanAvatarBg: {
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.65,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  batmanAvatarSelected: {
     borderWidth: 3,
     shadowOpacity: 1,
     shadowRadius: 20,

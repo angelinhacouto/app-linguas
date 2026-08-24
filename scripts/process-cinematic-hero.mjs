@@ -45,6 +45,25 @@ const PRESETS = {
       <rect width="512" height="512" fill="url(#glow)"/>
     </svg>`,
   },
+  batman: {
+    crop: { left: 18, top: 32, width: 215, height: 330 },
+    out: 'batman.png',
+    svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="g" cx="50%" cy="42%" r="58%">
+          <stop offset="0%" stop-color="#1a1a2e"/>
+          <stop offset="45%" stop-color="#0a0a14"/>
+          <stop offset="100%" stop-color="#05070f"/>
+        </radialGradient>
+        <radialGradient id="glow" cx="50%" cy="40%" r="22%">
+          <stop offset="0%" stop-color="#ffd700" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="#1565c0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="512" height="512" fill="url(#g)"/>
+      <rect width="512" height="512" fill="url(#glow)"/>
+    </svg>`,
+  },
 };
 
 async function buildHeroAvatar(heroId, sourcePath) {

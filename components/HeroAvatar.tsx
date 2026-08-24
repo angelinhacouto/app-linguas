@@ -39,9 +39,12 @@ export function HeroAvatar({
 }: HeroAvatarProps) {
   const hero = getSuperHero(heroId);
   const dim = SIZES[size];
-  const isCinematic = hero.id === 'ironman' || hero.id === 'spider-man';
+  const isCinematic =
+    hero.id === 'ironman' || hero.id === 'spider-man' || hero.id === 'batman';
   const isIronMan = hero.id === 'ironman';
   const isSpiderMan = hero.id === 'spider-man';
+  const isBatman = hero.id === 'batman';
+  const glowColor = isIronMan ? '#00E5FF' : isSpiderMan ? '#FF5252' : isBatman ? '#FFD700' : hero.accent;
   const [failed, setFailed] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -143,9 +146,17 @@ export function HeroAvatar({
               width: dim + 28,
               height: dim + 28,
               borderRadius: (dim + 28) / 2,
-              borderColor: isSpiderMan ? 'rgba(255,82,82,0.4)' : 'rgba(0,229,255,0.35)',
-              backgroundColor: isSpiderMan ? 'rgba(198,40,40,0.12)' : 'rgba(0,229,255,0.08)',
-              shadowColor: isSpiderMan ? '#FF5252' : hero.accent,
+              borderColor: isIronMan
+                ? 'rgba(0,229,255,0.35)'
+                : isSpiderMan
+                  ? 'rgba(255,82,82,0.4)'
+                  : 'rgba(255,215,0,0.35)',
+              backgroundColor: isIronMan
+                ? 'rgba(0,229,255,0.08)'
+                : isSpiderMan
+                  ? 'rgba(198,40,40,0.12)'
+                  : 'rgba(255,215,0,0.08)',
+              shadowColor: glowColor,
             },
           ]}
         />
@@ -175,11 +186,12 @@ export function HeroAvatar({
             height: dim,
             borderRadius: dim / 2,
             backgroundColor: isCinematic ? '#0A0E27' : hero.primary,
-            shadowColor: isCinematic ? (isSpiderMan ? '#FF5252' : hero.accent) : hero.primary,
+            shadowColor: isCinematic ? glowColor : hero.primary,
           },
           selected && { borderColor: hero.accent },
           isCinematic && styles.cinematicWrap,
           isIronMan && styles.ironWrap,
+          isBatman && styles.batmanWrap,
           selected && styles.selected,
           {
             transform: [
@@ -306,6 +318,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     shadowOpacity: 0.95,
     shadowRadius: 20,
+  },
+  batmanWrap: {
+    borderColor: 'rgba(255,215,0,0.45)',
+    borderWidth: 2,
+    shadowOpacity: 0.9,
+    shadowRadius: 18,
   },
   image: {
     backgroundColor: 'transparent',
