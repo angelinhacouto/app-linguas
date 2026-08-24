@@ -36,19 +36,30 @@ export const HEROES: Record<string, { name: string; title: string; emoji: string
 };
 
 export const COLORS = {
+  /** Ciano tecnológico */
   primary: '#00E5FF',
   primaryDark: '#00B8D4',
-  secondary: '#FF3366',
+  /** Vermelho de ação (CTA estilo HQ) */
+  secondary: '#E62429',
+  secondaryDark: '#B71C1C',
   success: '#00E676',
   warning: '#FFD600',
-  background: '#0A0E27',
-  backgroundLight: '#141B3A',
-  card: '#1A2347',
-  cardBorder: '#2A3A6B',
+  /** Quase preto cinematográfico */
+  background: '#05070F',
+  backgroundLight: '#0E1428',
+  card: '#121A33',
+  cardBorder: '#243056',
   text: '#FFFFFF',
-  textLight: '#8B9DC3',
+  textLight: '#9AA8C7',
   accent: '#FFD700',
   glow: '#00E5FF',
+  danger: '#E62429',
+};
+
+/** Tipografia do HQ (web carrega via +html.tsx) */
+export const FONTS = {
+  display: 'Orbitron',
+  body: 'Nunito',
 };
 
 export const FEEDBACK_MESSAGES = {

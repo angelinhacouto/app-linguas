@@ -1,5 +1,5 @@
-import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { COLORS } from '@/constants';
+import { Pressable, StyleSheet, Text, ViewStyle } from 'react-native';
+import { COLORS, FONTS } from '@/constants';
 
 interface TechButtonProps {
   label: string;
@@ -10,6 +10,7 @@ interface TechButtonProps {
   style?: ViewStyle;
 }
 
+/** Botão de missão — CTA vermelho cinematográfico + secundário tech */
 export function TechButton({
   label,
   onPress,
@@ -32,52 +33,54 @@ export function TechButton({
       ]}
     >
       {emoji ? <Text style={styles.emoji}>{emoji}</Text> : null}
-      <Text style={[styles.label, !isPrimary && styles.labelDark]}>{label}</Text>
+      <Text style={[styles.label, !isPrimary && styles.labelSecondary]}>{label}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 32,
+    borderRadius: 6,
+    paddingVertical: 16,
+    paddingHorizontal: 28,
     alignItems: 'center',
     justifyContent: 'center',
     minWidth: 220,
     borderWidth: 2,
   },
   primary: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primaryDark,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    backgroundColor: COLORS.secondary,
+    borderColor: COLORS.secondaryDark,
+    shadowColor: COLORS.secondary,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 10,
   },
   secondary: {
-    backgroundColor: 'transparent',
-    borderColor: COLORS.cardBorder,
+    backgroundColor: 'rgba(0,229,255,0.06)',
+    borderColor: COLORS.primary,
   },
   pressed: {
     transform: [{ scale: 0.97 }],
-    opacity: 0.9,
+    opacity: 0.92,
   },
   disabled: {
     opacity: 0.4,
   },
   emoji: {
-    fontSize: 28,
-    marginBottom: 4,
+    fontSize: 26,
+    marginBottom: 2,
   },
   label: {
-    color: COLORS.background,
-    fontSize: 18,
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: '800',
-    letterSpacing: 0.5,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    fontFamily: FONTS.display,
   },
-  labelDark: {
-    color: COLORS.textLight,
+  labelSecondary: {
+    color: COLORS.primary,
   },
 });

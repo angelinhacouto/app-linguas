@@ -9,7 +9,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: COLORS.background },
-          headerTintColor: COLORS.primary,
+          headerTintColor: COLORS.secondary,
           headerTitleStyle: { fontWeight: '700', fontSize: 18 },
           contentStyle: { backgroundColor: COLORS.background },
           headerShadowVisible: false,

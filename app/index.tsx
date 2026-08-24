@@ -2,13 +2,14 @@ import { useCallback, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AgeCard } from '@/components/AgeCard';
+import { BrandMark } from '@/components/BrandMark';
 import { LanguageCard } from '@/components/LanguageCard';
 import { MissionWelcome } from '@/components/MissionWelcome';
 import { StepIndicator } from '@/components/StepIndicator';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { TechInput } from '@/components/TechInput';
-import { APP_NAME, COLORS, STUDENT_AGES } from '@/constants';
+import { COLORS, FONTS, STUDENT_AGES } from '@/constants';
 import { HeroId } from '@/constants/heroes';
 import { LANGUAGES } from '@/constants/languages';
 import { playOpeningMusicOnInteraction, stopOpeningMusic, useOpeningMusic } from '@/hooks/useOpeningMusic';
@@ -73,11 +74,7 @@ export default function HomeScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View style={styles.logoWrap}>
-            <Text style={styles.logoText}>{APP_NAME}</Text>
-            <Text style={styles.tagline}>Academia de Línguas dos Super-Heróis</Text>
-          </View>
-
+          <BrandMark />
           <StepIndicator current={step} />
 
           {step === 1 && (
@@ -91,7 +88,8 @@ export default function HomeScreen() {
           )}
 
           {step === 2 && (
-            <View>
+            <View style={styles.panel}>
+              <Text style={styles.kicker}>IDENTIDADE</Text>
               <Text style={styles.title}>Qual o nome do herói?</Text>
               <Text style={styles.subtitle}>Digite o nome do aluno</Text>
               <TechInput
@@ -104,7 +102,6 @@ export default function HomeScreen() {
                 <TechButton label="Voltar" variant="secondary" onPress={() => setStep(1)} style={styles.halfButton} />
                 <TechButton
                   label="Continuar"
-                  emoji="➡️"
                   onPress={() => setStep(3)}
                   disabled={studentName.trim().length < 2}
                   style={styles.halfButton}
@@ -114,9 +111,10 @@ export default function HomeScreen() {
           )}
 
           {step === 3 && (
-            <View>
+            <View style={styles.panel}>
+              <Text style={styles.kicker}>NÍVEL</Text>
               <Text style={styles.title}>Qual a idade do aluno?</Text>
-              <Text style={styles.subtitle}>Escolha a idade para personalizar a missão</Text>
+              <Text style={styles.subtitle}>Isso personaliza as missões</Text>
               {STUDENT_AGES.map(({ age, ageGroupId: groupId }) => (
                 <AgeCard
                   key={age}
@@ -128,13 +126,14 @@ export default function HomeScreen() {
               ))}
               <View style={styles.row}>
                 <TechButton label="Voltar" variant="secondary" onPress={() => setStep(2)} style={styles.halfButton} />
-                <TechButton label="Continuar" emoji="➡️" onPress={() => setStep(4)} style={styles.halfButton} />
+                <TechButton label="Continuar" onPress={() => setStep(4)} style={styles.halfButton} />
               </View>
             </View>
           )}
 
           {step === 4 && (
-            <View>
+            <View style={styles.panel}>
+              <Text style={styles.kicker}>IDIOMA</Text>
               <Text style={styles.title}>Qual idioma aprender?</Text>
               <Text style={styles.subtitle}>Escolha a língua da missão</Text>
               {LANGUAGES.map((lang) => (
@@ -147,7 +146,7 @@ export default function HomeScreen() {
               ))}
               <View style={styles.row}>
                 <TechButton label="Voltar" variant="secondary" onPress={() => setStep(3)} style={styles.halfButton} />
-                <TechButton label="Iniciar missão!" emoji="🚀" onPress={goToLearn} style={styles.halfButton} />
+                <TechButton label="Iniciar HQ" emoji="🚀" onPress={goToLearn} style={styles.halfButton} />
               </View>
             </View>
           )}
@@ -159,28 +158,38 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  container: { padding: 24, paddingBottom: 48 },
-  logoWrap: { alignItems: 'center', marginBottom: 8, marginTop: 8 },
-  logoText: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: COLORS.primary,
-    letterSpacing: 2,
+  container: { padding: 22, paddingBottom: 56 },
+  panel: {
+    backgroundColor: COLORS.card,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: COLORS.cardBorder,
+    padding: 18,
   },
-  tagline: { fontSize: 13, color: COLORS.textLight, marginTop: 6, textAlign: 'center' },
-  title: {
-    fontSize: 22,
+  kicker: {
+    fontSize: 11,
+    letterSpacing: 2.5,
+    color: COLORS.secondary,
+    fontFamily: FONTS.display,
     fontWeight: '800',
-    color: COLORS.text,
     textAlign: 'center',
     marginBottom: 8,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: COLORS.text,
+    textAlign: 'center',
+    marginBottom: 6,
+    fontFamily: FONTS.display,
   },
   subtitle: {
     fontSize: 14,
     color: COLORS.textLight,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 18,
+    fontFamily: FONTS.body,
   },
-  row: { flexDirection: 'row', gap: 12, justifyContent: 'center', marginTop: 8 },
-  halfButton: { minWidth: 140, flex: 1 },
+  row: { flexDirection: 'row', gap: 12, justifyContent: 'center', marginTop: 10 },
+  halfButton: { minWidth: 120, flex: 1 },
 });

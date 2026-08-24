@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { BrandMark } from '@/components/BrandMark';
 import { HeroSelectCard } from '@/components/HeroSelectCard';
 import { TechButton } from '@/components/TechButton';
-import { COLORS } from '@/constants';
-import { HeroId, SUPER_HEROES } from '@/constants/heroes';
+import { COLORS, FONTS } from '@/constants';
+import { HeroId, SUPER_HEROES, getSuperHero } from '@/constants/heroes';
 
 interface MissionWelcomeProps {
   selectedHeroId: HeroId;
@@ -22,7 +23,7 @@ export function MissionWelcome({
 }: MissionWelcomeProps) {
   const [phase, setPhase] = useState<'gate' | 'pick'>('gate');
   const [musicError, setMusicError] = useState(false);
-  const selectedHero = SUPER_HEROES.find((h) => h.id === selectedHeroId);
+  const selectedHero = getSuperHero(selectedHeroId);
 
   const playMusic = async () => {
     setMusicError(false);
@@ -39,20 +40,25 @@ export function MissionWelcome({
   if (phase === 'gate') {
     return (
       <View style={styles.gate}>
-        <Text style={styles.gateEmoji}>🦸‍♂️🦸‍♀️</Text>
-        <Text style={styles.gateTitle}>Super-Heróis reunidos!</Text>
-        <Text style={styles.gateSub}>
-          Toque no botão abaixo para ouvir a trilha épica e começar.
-        </Text>
-        <TechButton
-          label="Tocar música e entrar"
-          emoji="🎵"
-          onPress={handleEnter}
-          style={styles.gateBtn}
-        />
-        {musicError ? (
-          <Text style={styles.warn}>Ative o som do dispositivo e tente de novo.</Text>
-        ) : null}
+        <View style={styles.heroPanel}>
+          <View style={styles.heroGlow} />
+          <Text style={styles.heroPanelKicker}>NOVA MISSÃO DISPONÍVEL</Text>
+          <Text style={styles.heroPanelTitle}>Aprenda inglês{'\n'}como um herói</Text>
+          <Text style={styles.heroPanelSub}>
+            Entre no HQ, escolha seu mentor e comece a explorar mundos cheios de palavras.
+          </Text>
+          <TechButton
+            label="Entrar no HQ"
+            emoji="🚀"
+            onPress={handleEnter}
+            style={styles.gateBtn}
+          />
+          {musicError ? (
+            <Text style={styles.warn}>Ative o som do aparelho e tente de novo.</Text>
+          ) : (
+            <Text style={styles.musicHint}>🎵 A trilha épica toca ao entrar</Text>
+          )}
+        </View>
       </View>
     );
   }
@@ -60,18 +66,16 @@ export function MissionWelcome({
   return (
     <View style={styles.wrap}>
       <View style={styles.banner}>
-        <Text style={styles.headline}>Escolha seu mentor</Text>
-        <Text style={styles.subhead}>Toque no herói para ouvi-lo</Text>
+        <Text style={styles.kicker}>ESCOLHA SEU MENTOR</Text>
+        <Text style={styles.headline}>Quem vai te treinar?</Text>
+        <Text style={styles.subhead}>Toque no herói para ouvir a saudação</Text>
         <TechButton
-          label={musicPlaying ? 'Trilha tocando…' : 'Tocar trilha épica'}
+          label={musicPlaying ? 'Trilha tocando…' : 'Ouvir trilha de novo'}
           emoji="🎵"
           variant="secondary"
           onPress={playMusic}
           style={styles.musicBtn}
         />
-        {musicError ? (
-          <Text style={styles.warn}>Não deu para tocar. Verifique o volume.</Text>
-        ) : null}
       </View>
 
       <View style={styles.grid}>
@@ -85,44 +89,76 @@ export function MissionWelcome({
         ))}
       </View>
 
-      {selectedHero ? (
-        <View style={[styles.missionBox, { borderColor: selectedHero.accent }]}>
-          <Text style={styles.missionTitle}>Missão com {selectedHero.name}</Text>
-          <Text style={styles.missionSub}>{selectedHero.title}</Text>
-        </View>
-      ) : null}
+      <View style={[styles.missionBox, { borderColor: selectedHero.accent }]}>
+        <Text style={styles.missionKicker}>MENTOR SELECIONADO</Text>
+        <Text style={styles.missionTitle}>{selectedHero.name}</Text>
+        <Text style={styles.missionSub}>{selectedHero.title}</Text>
+      </View>
 
-      <TechButton label="Continuar" emoji="🚀" onPress={onStart} style={styles.startBtn} />
+      <TechButton label="Continuar missão" emoji="⚡" onPress={onStart} style={styles.startBtn} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   gate: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 16,
+    width: '100%',
   },
-  gateEmoji: {
-    fontSize: 48,
+  heroPanel: {
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: COLORS.cardBorder,
+    backgroundColor: COLORS.card,
+    paddingVertical: 36,
+    paddingHorizontal: 22,
+    alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  heroGlow: {
+    position: 'absolute',
+    top: -60,
+    right: -40,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: COLORS.secondary,
+    opacity: 0.18,
+  },
+  heroPanelKicker: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 2,
+    color: COLORS.secondary,
+    fontFamily: FONTS.display,
     marginBottom: 12,
   },
-  gateTitle: {
-    fontSize: 26,
+  heroPanelTitle: {
+    fontSize: 30,
     fontWeight: '900',
     color: COLORS.text,
     textAlign: 'center',
-    marginBottom: 10,
+    lineHeight: 36,
+    fontFamily: FONTS.display,
+    marginBottom: 12,
   },
-  gateSub: {
+  heroPanelSub: {
     fontSize: 15,
     color: COLORS.textLight,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 28,
+    paddingHorizontal: 4,
+    fontFamily: FONTS.body,
   },
   gateBtn: {
-    minWidth: 280,
+    minWidth: 260,
+  },
+  musicHint: {
+    marginTop: 14,
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '700',
   },
   warn: {
     marginTop: 12,
@@ -134,24 +170,34 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   banner: {
-    backgroundColor: COLORS.backgroundLight,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    borderWidth: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: 8,
+    padding: 18,
+    marginBottom: 16,
+    borderWidth: 2,
     borderColor: COLORS.cardBorder,
     alignItems: 'center',
   },
+  kicker: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 2,
+    color: COLORS.secondary,
+    fontFamily: FONTS.display,
+    marginBottom: 8,
+  },
   headline: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '900',
     color: COLORS.text,
-    marginBottom: 4,
+    fontFamily: FONTS.display,
+    marginBottom: 6,
   },
   subhead: {
     fontSize: 14,
     color: COLORS.textLight,
-    marginBottom: 10,
+    marginBottom: 12,
+    fontFamily: FONTS.body,
   },
   musicBtn: {
     minWidth: 220,
@@ -164,18 +210,26 @@ const styles = StyleSheet.create({
   },
   missionBox: {
     marginTop: 8,
-    marginBottom: 14,
+    marginBottom: 16,
     borderWidth: 2,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 8,
+    padding: 16,
     backgroundColor: COLORS.card,
     alignItems: 'center',
   },
-  missionTitle: {
-    fontSize: 16,
-    fontWeight: '800',
+  missionKicker: {
+    fontSize: 10,
+    letterSpacing: 2,
     color: COLORS.primary,
-    textAlign: 'center',
+    fontFamily: FONTS.display,
+    fontWeight: '800',
+    marginBottom: 6,
+  },
+  missionTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: COLORS.text,
+    fontFamily: FONTS.display,
   },
   missionSub: {
     fontSize: 13,
@@ -184,6 +238,6 @@ const styles = StyleSheet.create({
   },
   startBtn: {
     alignSelf: 'center',
-    minWidth: 240,
+    minWidth: 260,
   },
 });

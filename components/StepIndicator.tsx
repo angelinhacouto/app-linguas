@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { COLORS } from '@/constants';
+import { COLORS, FONTS } from '@/constants';
 
 interface StepIndicatorProps {
   current: 1 | 2 | 3 | 4;
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 22,
     flexWrap: 'wrap',
   },
   stepRow: {
@@ -45,12 +45,12 @@ const styles = StyleSheet.create({
   },
   stepItem: {
     alignItems: 'center',
-    width: 52,
+    width: 56,
   },
   dot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 30,
+    height: 30,
+    borderRadius: 4,
     backgroundColor: COLORS.card,
     borderWidth: 2,
     borderColor: COLORS.cardBorder,
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   dotActive: {
-    borderColor: COLORS.primary,
+    borderColor: COLORS.secondary,
     backgroundColor: COLORS.backgroundLight,
   },
   dotDone: {
@@ -69,23 +69,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: COLORS.text,
+    fontFamily: FONTS.display,
   },
   label: {
     fontSize: 10,
     color: COLORS.textLight,
     marginTop: 4,
     textAlign: 'center',
+    fontFamily: FONTS.body,
   },
   labelActive: {
-    color: COLORS.primary,
-    fontWeight: '700',
+    color: COLORS.secondary,
+    fontWeight: '800',
   },
   line: {
-    width: 16,
+    width: 14,
     height: 2,
     backgroundColor: COLORS.cardBorder,
     marginHorizontal: 2,
-    marginTop: 15,
+    marginTop: 14,
   },
   lineDone: {
     backgroundColor: COLORS.success,
