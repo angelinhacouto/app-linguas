@@ -1,12 +1,5 @@
 import { useEffect, useRef } from 'react';
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '@/constants';
 import { EnvironmentMeta, Word } from '@/types';
 
@@ -18,7 +11,61 @@ interface ExplorationArenaProps {
   onWordPress: (word: Word) => void;
 }
 
-function Hotspot({
+const ROOM_SCENES: Record<
+  string,
+  { wall: string; floor: string; accent: string; furniture: string }
+> = {
+  bedroom: {
+    wall: '#3D4F8F',
+    floor: '#5D4037',
+    accent: '#90CAF9',
+    furniture: '#6D4C41',
+  },
+  kitchen: {
+    wall: '#FFF3E0',
+    floor: '#A1887F',
+    accent: '#FFB74D',
+    furniture: '#ECEFF1',
+  },
+  'living-room': {
+    wall: '#4A148C',
+    floor: '#5D4037',
+    accent: '#CE93D8',
+    furniture: '#6A1B9A',
+  },
+  bathroom: {
+    wall: '#E3F2FD',
+    floor: '#90CAF9',
+    accent: '#81D4FA',
+    furniture: '#BBDEFB',
+  },
+  forest: {
+    wall: '#81C784',
+    floor: '#33691E',
+    accent: '#A5D6A7',
+    furniture: '#2E7D32',
+  },
+  beach: {
+    wall: '#4FC3F7',
+    floor: '#FFE082',
+    accent: '#29B6F6',
+    furniture: '#FFF59D',
+  },
+  playground: {
+    wall: '#81D4FA',
+    floor: '#8BC34A',
+    accent: '#FFD54F',
+    furniture: '#66BB6A',
+  },
+  farm: {
+    wall: '#81D4FA',
+    floor: '#A1887F',
+    accent: '#FFB74D',
+    furniture: '#8D6E63',
+  },
+};
+
+function ObjectTile({
   word,
   discovered,
   active,
@@ -31,70 +78,98 @@ function Hotspot({
   accentColor: string;
   onPress: () => void;
 }) {
-  const pulse = useRef(new Animated.Value(0)).current;
-  const position = word.position ?? { x: 50, y: 50 };
+  const bounce = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    if (discovered) {
-      pulse.setValue(0);
-      return;
+    if (!discovered) {
+      const anim = Animated.loop(
+        Animated.sequence([
+          Animated.timing(bounce, { toValue: 1.05, duration: 700, useNativeDriver: true }),
+          Animated.timing(bounce, { toValue: 1, duration: 700, useNativeDriver: true }),
+        ])
+      );
+      anim.start();
+      return () => anim.stop();
     }
-    const anim = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 900, useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 900, useNativeDriver: true }),
-      ])
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [discovered, pulse]);
-
-  const ringScale = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.35],
-  });
-
-  const ringOpacity = pulse.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.45, 0],
-  });
+    bounce.setValue(1);
+  }, [discovered, bounce]);
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.hotspot,
-        {
-          left: `${position.x}%`,
-          top: `${position.y}%`,
-        },
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={word.translation}
-    >
-      {!discovered && (
-        <Animated.View
-          style={[
-            styles.pulseRing,
-            {
-              borderColor: accentColor,
-              opacity: ringOpacity,
-              transform: [{ scale: ringScale }],
-            },
-          ]}
-        />
-      )}
-      <View
-        style={[
-          styles.hotspotBubble,
-          discovered && styles.hotspotDiscovered,
-          active && { borderColor: accentColor, backgroundColor: `${accentColor}33` },
+    <Animated.View style={[styles.tileWrap, { transform: [{ scale: bounce }] }]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.tile,
+          {
+            borderColor: active || discovered ? accentColor : COLORS.cardBorder,
+            backgroundColor: discovered ? '#FFFFFF' : COLORS.card,
+          },
+          pressed && styles.tilePressed,
         ]}
       >
-        <Text style={styles.hotspotEmoji}>{word.emoji}</Text>
+        <Text style={styles.tileEmoji}>{word.emoji}</Text>
+        <Text style={[styles.tileLabel, discovered && { color: accentColor }]} numberOfLines={1}>
+          {discovered ? word.text : '???'}
+        </Text>
+        <Text style={styles.tileHint} numberOfLines={1}>
+          {word.translation}
+        </Text>
+        {discovered ? (
+          <View style={[styles.foundBadge, { backgroundColor: COLORS.success }]}>
+            <Text style={styles.foundText}>✓</Text>
+          </View>
+        ) : (
+          <Text style={styles.tapHint}>Toca aqui</Text>
+        )}
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function RoomBackdrop({ environment }: { environment: EnvironmentMeta }) {
+  const scene = ROOM_SCENES[environment.id] ?? ROOM_SCENES.bedroom;
+
+  return (
+    <View style={[styles.room, { backgroundColor: scene.wall }]}>
+      {/* janela / céu */}
+      <View style={[styles.window, { borderColor: scene.accent }]}>
+        <View style={[styles.windowPane, { backgroundColor: scene.accent }]} />
+        <Text style={styles.windowEmoji}>
+          {environment.group === 'nature' ? '☀️' : '🌙'}
+        </Text>
       </View>
-      {discovered && <Text style={styles.checkMark}>✓</Text>}
-    </Pressable>
+
+      {/* tapete / chão */}
+      <View style={[styles.floor, { backgroundColor: scene.floor }]}>
+        <View style={[styles.rug, { backgroundColor: scene.accent + '55' }]} />
+      </View>
+
+      {/* móvel simples */}
+      <View style={[styles.furniture, { backgroundColor: scene.furniture }]} />
+
+      <View style={styles.roomTitleWrap}>
+        <Text style={styles.roomEmoji}>{environment.emoji}</Text>
+        <Text
+          style={[
+            styles.roomTitle,
+            environment.group === 'house' &&
+              ['kitchen', 'bathroom'].includes(environment.id) && { color: '#1A2347' },
+          ]}
+        >
+          {environment.title}
+        </Text>
+      </View>
+
+      <Text
+        style={[
+          styles.roomHint,
+          environment.group === 'house' &&
+            ['kitchen', 'bathroom'].includes(environment.id) && { color: '#37474F' },
+        ]}
+      >
+        Toque nos objetos abaixo 👇
+      </Text>
+    </View>
   );
 }
 
@@ -105,46 +180,42 @@ export function ExplorationArena({
   activeWordId,
   onWordPress,
 }: ExplorationArenaProps) {
-  const { width } = useWindowDimensions();
-  const sceneHeight = Math.min(420, Math.max(320, width * 0.85));
+  const found = discoveredIds.size;
+  const total = words.length;
+  const progress = total > 0 ? found / total : 0;
 
   return (
-    <View style={[styles.wrap, { height: sceneHeight }]}>
-      <View style={[styles.sky, { backgroundColor: environment.skyColor }]} />
-      <View style={[styles.ground, { backgroundColor: environment.groundColor }]} />
+    <View style={styles.wrap}>
+      <RoomBackdrop environment={environment} />
 
-      {environment.decor.map((item, index) => (
-        <Text
-          key={`${item.emoji}-${index}`}
-          style={[
-            styles.decor,
-            {
-              left: `${item.x}%`,
-              top: `${item.y}%`,
-              fontSize: item.size ?? 24,
-            },
-          ]}
-        >
-          {item.emoji}
+      <View style={styles.progressWrap}>
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              {
+                width: `${Math.max(progress * 100, 4)}%`,
+                backgroundColor: environment.accentColor,
+              },
+            ]}
+          />
+        </View>
+        <Text style={styles.progressLabel}>
+          {found} de {total} objetos
         </Text>
-      ))}
+      </View>
 
-      <View style={styles.horizon} />
-
-      {words.map((word) => (
-        <Hotspot
-          key={word.id}
-          word={word}
-          discovered={discoveredIds.has(word.id)}
-          active={activeWordId === word.id}
-          accentColor={environment.accentColor}
-          onPress={() => onWordPress(word)}
-        />
-      ))}
-
-      <View style={styles.sceneLabel}>
-        <Text style={styles.sceneEmoji}>{environment.emoji}</Text>
-        <Text style={styles.sceneTitle}>{environment.title}</Text>
+      <View style={styles.grid}>
+        {words.map((word) => (
+          <ObjectTile
+            key={word.id}
+            word={word}
+            discovered={discoveredIds.has(word.id)}
+            active={activeWordId === word.id}
+            accentColor={environment.accentColor}
+            onPress={() => onWordPress(word)}
+          />
+        ))}
       </View>
     </View>
   );
@@ -153,106 +224,165 @@ export function ExplorationArena({
 const styles = StyleSheet.create({
   wrap: {
     width: '100%',
+  },
+  room: {
+    width: '100%',
+    height: 160,
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: COLORS.cardBorder,
+    marginBottom: 14,
     position: 'relative',
   },
-  sky: {
+  window: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '58%',
-  },
-  ground: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: '45%',
-  },
-  horizon: {
-    position: 'absolute',
-    top: '54%',
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.12)',
-  },
-  decor: {
-    position: 'absolute',
-    opacity: 0.85,
-  },
-  hotspot: {
-    position: 'absolute',
-    width: 76,
-    height: 76,
-    marginLeft: -38,
-    marginTop: -38,
+    top: 18,
+    right: 18,
+    width: 64,
+    height: 64,
+    borderRadius: 12,
+    borderWidth: 3,
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 5,
-  },
-  pulseRing: {
-    position: 'absolute',
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 3,
-  },
-  hotspotBubble: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: 'rgba(255,255,255,0.92)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: COLORS.cardBorder,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  hotspotDiscovered: {
-    backgroundColor: 'rgba(255,255,255,0.75)',
-    opacity: 0.95,
-  },
-  hotspotEmoji: {
-    fontSize: 34,
-  },
-  checkMark: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    fontSize: 14,
-    fontWeight: '900',
-    color: COLORS.success,
-    backgroundColor: '#fff',
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    textAlign: 'center',
-    lineHeight: 20,
     overflow: 'hidden',
   },
-  sceneLabel: {
+  windowPane: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.35,
+  },
+  windowEmoji: {
+    fontSize: 28,
+  },
+  floor: {
     position: 'absolute',
-    top: 10,
-    right: 12,
-    alignItems: 'flex-end',
-    opacity: 0.9,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 54,
   },
-  sceneEmoji: {
+  rug: {
+    position: 'absolute',
+    alignSelf: 'center',
+    left: '20%',
+    right: '20%',
+    bottom: 10,
+    height: 28,
+    borderRadius: 14,
+  },
+  furniture: {
+    position: 'absolute',
+    left: 16,
+    bottom: 48,
+    width: 70,
+    height: 36,
+    borderRadius: 8,
+    opacity: 0.85,
+  },
+  roomTitleWrap: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  roomEmoji: {
+    fontSize: 28,
+  },
+  roomTitle: {
     fontSize: 22,
+    fontWeight: '900',
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
-  sceneTitle: {
+  roomHint: {
+    position: 'absolute',
+    left: 16,
+    bottom: 62,
     fontSize: 13,
-    fontWeight: '800',
-    color: '#fff',
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.9)',
+  },
+  progressWrap: {
+    marginBottom: 12,
+  },
+  progressTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.backgroundLight,
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 5,
+  },
+  progressLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.textLight,
+    textAlign: 'center',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  tileWrap: {
+    width: '48%',
+    marginBottom: 12,
+  },
+  tile: {
+    borderRadius: 18,
+    borderWidth: 3,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    minHeight: 140,
+  },
+  tilePressed: {
+    opacity: 0.88,
+    transform: [{ scale: 0.98 }],
+  },
+  tileEmoji: {
+    fontSize: 48,
+    marginBottom: 6,
+  },
+  tileLabel: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: COLORS.text,
+    textAlign: 'center',
+  },
+  tileHint: {
+    fontSize: 13,
+    color: COLORS.textLight,
     marginTop: 2,
+    textAlign: 'center',
+  },
+  tapHint: {
+    marginTop: 8,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.primary,
+  },
+  foundBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  foundText: {
+    color: '#fff',
+    fontWeight: '900',
+    fontSize: 13,
   },
 });

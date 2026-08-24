@@ -56,31 +56,29 @@ export default function ExploreScreen() {
 
   useEffect(() => {
     if (!environment) return;
-    const line = `${superHero.name}: ${environment.introLine}`;
+    const line = `Olá, ${studentName}! ${environment.introLine}`;
     setHeroLine(line);
     speakHeroLine(line);
-  }, [environment, superHero.name]);
+  }, [environment, studentName]);
 
   useEffect(() => {
-    if (words.length > 0 && discoveredIds.size >= words.length) {
+    if (words.length > 0 && discoveredIds.size >= words.length && !complete) {
       setComplete(true);
-      const line = `Incrível, ${studentName}! Você descobriu tudo em ${environment?.title ?? 'o ambiente'}!`;
+      const line = `Muito bem, ${studentName}! Você achou tudo no ${environment?.title ?? 'ambiente'}!`;
       setHeroLine(line);
       speakHeroLine(line);
     }
-  }, [discoveredIds.size, words.length, studentName, environment?.title]);
+  }, [discoveredIds.size, words.length, studentName, environment?.title, complete]);
 
   const handleWordPress = useCallback(
     (word: Word) => {
       setActiveWord(word);
       setDiscoveredIds((prev) => new Set(prev).add(word.id));
-
-      const line = `${word.translation}! Em ${lang.label.toLowerCase()}: ${word.text}`;
-      setHeroLine(`${superHero.name}: ${line}`);
-      speakHeroLine(`${word.translation}! Em ${lang.label.toLowerCase()}, fala assim:`);
-      setTimeout(() => speakWordOnly(word.text, languageId), 1200);
+      setHeroLine(`Isso é ${word.translation}! Em ${lang.label}: ${word.text}`);
+      speakHeroLine(`Isso é ${word.translation}! Em ${lang.label.toLowerCase()}, fala assim:`);
+      setTimeout(() => speakWordOnly(word.text, languageId), 1100);
     },
-    [superHero.name, lang.label, languageId]
+    [lang.label, languageId]
   );
 
   const handlePractice = useCallback(() => {
@@ -109,12 +107,10 @@ export default function ExploreScreen() {
     <TechBackground>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={[styles.heroRow, { borderColor: superHero.accent }]}>
-          <HeroAvatar heroId={superHero.id} size="md" selected mood="present" />
+          <HeroAvatar heroId={superHero.id} size="md" />
           <View style={styles.heroInfo}>
-            <Text style={styles.heroName}>{superHero.name}</Text>
-            <Text style={styles.progress}>
-              {discoveredIds.size} / {words.length} descobertos
-            </Text>
+            <Text style={styles.greeting}>Com {superHero.name}</Text>
+            <Text style={styles.mission}>Explorando: {environment.title}</Text>
           </View>
         </View>
 
@@ -130,7 +126,7 @@ export default function ExploreScreen() {
           <Text style={styles.bubbleText}>{heroLine}</Text>
         </View>
 
-        {activeWord && (
+        {activeWord ? (
           <View style={[styles.wordCard, { borderColor: environment.accentColor }]}>
             <Text style={styles.wordEmoji}>{activeWord.emoji}</Text>
             <Text style={styles.wordText}>{activeWord.text}</Text>
@@ -143,23 +139,21 @@ export default function ExploreScreen() {
               style={styles.listenBtn}
             />
           </View>
-        )}
+        ) : null}
 
-        {complete && (
+        {complete ? (
           <View style={styles.completeBox}>
             <Text style={styles.completeEmoji}>🎉</Text>
-            <Text style={styles.completeTitle}>Exploração completa!</Text>
-            <Text style={styles.completeSub}>
-              {superHero.name} quer treinar a pronúncia com você!
-            </Text>
+            <Text style={styles.completeTitle}>Tudo encontrado!</Text>
+            <Text style={styles.completeSub}>Quer treinar a pronúncia agora?</Text>
             <TechButton
-              label="Praticar pronúncia"
+              label="Praticar com o microfone"
               emoji="🎤"
               onPress={handlePractice}
               style={styles.practiceBtn}
             />
           </View>
-        )}
+        ) : null}
       </ScrollView>
     </TechBackground>
   );
@@ -183,36 +177,36 @@ const styles = StyleSheet.create({
   heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     backgroundColor: COLORS.card,
     borderRadius: 16,
-    padding: 14,
+    padding: 12,
     marginBottom: 16,
     borderWidth: 2,
   },
   heroInfo: {
     flex: 1,
   },
-  heroName: {
+  greeting: {
     fontSize: 18,
     fontWeight: '800',
     color: COLORS.text,
   },
-  progress: {
+  mission: {
     fontSize: 14,
     color: COLORS.primary,
     marginTop: 4,
     fontWeight: '700',
   },
   bubble: {
-    marginTop: 16,
+    marginTop: 8,
     backgroundColor: COLORS.backgroundLight,
     borderRadius: 16,
     padding: 14,
     borderWidth: 2,
   },
   bubbleText: {
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.text,
     lineHeight: 22,
     fontWeight: '600',
@@ -226,10 +220,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   wordEmoji: {
-    fontSize: 64,
+    fontSize: 72,
   },
   wordText: {
-    fontSize: 32,
+    fontSize: 34,
     fontWeight: '900',
     color: COLORS.primary,
     marginTop: 8,
@@ -269,6 +263,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   practiceBtn: {
-    minWidth: 220,
+    minWidth: 240,
   },
 });

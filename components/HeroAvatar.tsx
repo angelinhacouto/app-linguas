@@ -60,7 +60,7 @@ export function HeroAvatar({
   }, [isInteractive, floatY]);
 
   useEffect(() => {
-    if (!selected) {
+    if (!selected || !isInteractive) {
       ringScale.setValue(1);
       return;
     }
@@ -72,10 +72,10 @@ export function HeroAvatar({
     );
     anim.start();
     return () => anim.stop();
-  }, [selected, ringScale]);
+  }, [selected, isInteractive, ringScale]);
 
   useEffect(() => {
-    if (mood === 'idle') return;
+    if (mood === 'idle' || !isInteractive) return;
 
     if (mood === 'happy' || mood === 'power') {
       Animated.parallel([
@@ -114,7 +114,7 @@ export function HeroAvatar({
     if (mood === 'present') {
       Animated.spring(scale, { toValue: 1.08, friction: 4, useNativeDriver: true }).start();
     }
-  }, [mood, scale, symbolScale, symbolOpacity, ringScale, floatY]);
+  }, [mood, isInteractive, scale, symbolScale, symbolOpacity, ringScale, floatY]);
 
   const handlePress = () => {
     Animated.parallel([
@@ -128,8 +128,8 @@ export function HeroAvatar({
   };
 
   const avatarBody = (
-    <View style={[styles.stack, style]}>
-      {selected && (
+    <View style={[styles.stack, { width: dim, height: dim }, style]}>
+      {selected && isInteractive && (
         <Animated.View
           pointerEvents="none"
           style={[
@@ -148,8 +148,13 @@ export function HeroAvatar({
       <Animated.View
         style={[
           styles.wrap,
-          { width: dim, height: dim, borderRadius: dim / 2 },
-          selected && { borderColor: hero.accent, shadowColor: hero.accent },
+          {
+            width: dim,
+            height: dim,
+            borderRadius: dim / 2,
+            backgroundColor: hero.primary,
+          },
+          selected && { borderColor: hero.accent },
           selected && styles.selected,
           {
             transform: [
@@ -171,18 +176,20 @@ export function HeroAvatar({
         )}
       </Animated.View>
 
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.symbolBurst,
-          {
-            opacity: symbolOpacity,
-            transform: [{ scale: symbolScale }],
-          },
-        ]}
-      >
-        <Text style={styles.symbolText}>{hero.symbol}</Text>
-      </Animated.View>
+      {isInteractive ? (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.symbolBurst,
+            {
+              opacity: symbolOpacity,
+              transform: [{ scale: symbolScale }],
+            },
+          ]}
+        >
+          <Text style={styles.symbolText}>{hero.symbol}</Text>
+        </Animated.View>
+      ) : null}
     </View>
   );
 
