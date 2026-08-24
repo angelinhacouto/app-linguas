@@ -39,7 +39,9 @@ export function HeroAvatar({
 }: HeroAvatarProps) {
   const hero = getSuperHero(heroId);
   const dim = SIZES[size];
+  const isCinematic = hero.id === 'ironman' || hero.id === 'spider-man';
   const isIronMan = hero.id === 'ironman';
+  const isSpiderMan = hero.id === 'spider-man';
   const [failed, setFailed] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -132,7 +134,7 @@ export function HeroAvatar({
 
   const avatarBody = (
     <View style={[styles.stack, { width: dim, height: dim }, style]}>
-      {isIronMan && (
+      {isCinematic && (
         <View
           pointerEvents="none"
           style={[
@@ -141,7 +143,9 @@ export function HeroAvatar({
               width: dim + 28,
               height: dim + 28,
               borderRadius: (dim + 28) / 2,
-              shadowColor: hero.accent,
+              borderColor: isSpiderMan ? 'rgba(255,82,82,0.4)' : 'rgba(0,229,255,0.35)',
+              backgroundColor: isSpiderMan ? 'rgba(198,40,40,0.12)' : 'rgba(0,229,255,0.08)',
+              shadowColor: isSpiderMan ? '#FF5252' : hero.accent,
             },
           ]}
         />
@@ -170,10 +174,11 @@ export function HeroAvatar({
             width: dim,
             height: dim,
             borderRadius: dim / 2,
-            backgroundColor: isIronMan ? '#0A0E27' : hero.primary,
-            shadowColor: isIronMan ? hero.accent : hero.primary,
+            backgroundColor: isCinematic ? '#0A0E27' : hero.primary,
+            shadowColor: isCinematic ? (isSpiderMan ? '#FF5252' : hero.accent) : hero.primary,
           },
           selected && { borderColor: hero.accent },
+          isCinematic && styles.cinematicWrap,
           isIronMan && styles.ironWrap,
           selected && styles.selected,
           {
@@ -190,7 +195,7 @@ export function HeroAvatar({
             style={[
               styles.image,
               { width: dim, height: dim, borderRadius: dim / 2 },
-              isIronMan && Platform.OS === 'web' ? (styles.ironImageWeb as ImageStyle) : null,
+              isCinematic && Platform.OS === 'web' ? (styles.cinematicImageWeb as ImageStyle) : null,
             ]}
             resizeMode="cover"
             onError={() => setFailed(true)}
@@ -290,6 +295,12 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
     elevation: 10,
   },
+  cinematicWrap: {
+    borderColor: 'rgba(255,255,255,0.25)',
+    borderWidth: 2,
+    shadowOpacity: 0.9,
+    shadowRadius: 18,
+  },
   ironWrap: {
     borderColor: 'rgba(0,229,255,0.55)',
     borderWidth: 2,
@@ -299,7 +310,7 @@ const styles = StyleSheet.create({
   image: {
     backgroundColor: 'transparent',
   },
-  ironImageWeb: Platform.select({
+  cinematicImageWeb: Platform.select({
     web: {
       objectFit: 'cover',
       objectPosition: '50% 38%',

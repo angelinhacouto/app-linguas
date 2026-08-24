@@ -16,6 +16,8 @@ interface HeroSelectCardProps {
 export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const isIronMan = hero.id === 'ironman';
+  const isSpiderMan = hero.id === 'spider-man';
+  const isCinematic = isIronMan || isSpiderMan;
 
   const handlePress = () => {
     onPress();
@@ -38,11 +40,11 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
         style={[
           styles.avatarBg,
           {
-            backgroundColor: isIronMan ? '#0A0E27' : hero.primary,
-            borderColor: selected || isIronMan ? hero.accent : COLORS.cardBorder,
+            backgroundColor: isCinematic ? '#0A0E27' : hero.primary,
+            borderColor: selected || isCinematic ? hero.accent : COLORS.cardBorder,
           },
-          isIronMan && styles.ironAvatarBg,
-          selected && isIronMan && styles.ironAvatarSelected,
+          isCinematic && (isSpiderMan ? styles.spiderAvatarBg : styles.ironAvatarBg),
+          selected && isCinematic && (isSpiderMan ? styles.spiderAvatarSelected : styles.ironAvatarSelected),
         ]}
       >
         {!imgFailed ? (
@@ -50,7 +52,7 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
             source={getHeroImageSource(hero.id as HeroId)}
             style={[
               styles.avatar,
-              isIronMan && Platform.OS === 'web' && (styles.ironAvatarWeb as ImageStyle),
+              isCinematic && Platform.OS === 'web' && (styles.cinematicAvatarWeb as ImageStyle),
             ]}
             resizeMode="cover"
             onError={() => setImgFailed(true)}
@@ -113,11 +115,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 20,
   },
+  spiderAvatarBg: {
+    shadowColor: '#FF5252',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  spiderAvatarSelected: {
+    borderWidth: 3,
+    shadowOpacity: 1,
+    shadowRadius: 20,
+  },
   avatar: {
     width: AVATAR,
     height: AVATAR,
   },
-  ironAvatarWeb: Platform.select({
+  cinematicAvatarWeb: Platform.select({
     web: {
       objectFit: 'cover',
       objectPosition: '50% 38%',
