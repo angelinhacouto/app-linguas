@@ -7,6 +7,7 @@ interface ExplorationArenaProps {
   environment: EnvironmentMeta;
   words: Word[];
   discoveredIds: Set<string>;
+  practicedIds?: Set<string>;
   activeWordId?: string | null;
   onWordPress: (word: Word) => void;
 }
@@ -68,12 +69,14 @@ const ROOM_SCENES: Record<
 function ObjectTile({
   word,
   discovered,
+  practiced,
   active,
   accentColor,
   onPress,
 }: {
   word: Word;
   discovered: boolean;
+  practiced: boolean;
   active: boolean;
   accentColor: string;
   onPress: () => void;
@@ -94,6 +97,12 @@ function ObjectTile({
     bounce.setValue(1);
   }, [discovered, bounce]);
 
+  const borderColor = practiced
+    ? COLORS.success
+    : active || discovered
+      ? accentColor
+      : COLORS.cardBorder;
+
   return (
     <Animated.View style={[styles.tileWrap, { transform: [{ scale: bounce }] }]}>
       <Pressable
@@ -101,23 +110,28 @@ function ObjectTile({
         style={({ pressed }) => [
           styles.tile,
           {
-            borderColor: active || discovered ? accentColor : COLORS.cardBorder,
-            backgroundColor: discovered ? '#FFFFFF' : COLORS.card,
+            borderColor,
+            backgroundColor: practiced ? '#0D3320' : discovered ? COLORS.card : COLORS.backgroundLight,
           },
           pressed && styles.tilePressed,
         ]}
       >
         <Text style={styles.tileEmoji}>{word.emoji}</Text>
-        <Text style={[styles.tileLabel, discovered && { color: accentColor }]} numberOfLines={1}>
-          {discovered ? word.text : '???'}
+        <Text
+          style={[styles.tileLabel, (discovered || practiced) && { color: practiced ? COLORS.success : accentColor }]}
+          numberOfLines={1}
+        >
+          {discovered || practiced ? word.text : '???'}
         </Text>
         <Text style={styles.tileHint} numberOfLines={1}>
           {word.translation}
         </Text>
-        {discovered ? (
+        {practiced ? (
           <View style={[styles.foundBadge, { backgroundColor: COLORS.success }]}>
             <Text style={styles.foundText}>✓</Text>
           </View>
+        ) : discovered ? (
+          <Text style={styles.tapHint}>Repete no mic</Text>
         ) : (
           <Text style={styles.tapHint}>Toca aqui</Text>
         )}
@@ -167,7 +181,7 @@ function RoomBackdrop({ environment }: { environment: EnvironmentMeta }) {
             ['kitchen', 'bathroom'].includes(environment.id) && { color: '#37474F' },
         ]}
       >
-        Toque nos objetos abaixo 👇
+        Toque · ouça o inglês · repita no mic
       </Text>
     </View>
   );
@@ -177,12 +191,13 @@ export function ExplorationArena({
   environment,
   words,
   discoveredIds,
+  practicedIds,
   activeWordId,
   onWordPress,
 }: ExplorationArenaProps) {
-  const found = discoveredIds.size;
+  const practiced = practicedIds?.size ?? 0;
   const total = words.length;
-  const progress = total > 0 ? found / total : 0;
+  const progress = total > 0 ? practiced / total : 0;
 
   return (
     <View style={styles.wrap}>
@@ -201,7 +216,7 @@ export function ExplorationArena({
           />
         </View>
         <Text style={styles.progressLabel}>
-          {found} de {total} objetos
+          {practiced} de {total} praticados · {discoveredIds.size} descobertos
         </Text>
       </View>
 
@@ -211,6 +226,7 @@ export function ExplorationArena({
             key={word.id}
             word={word}
             discovered={discoveredIds.has(word.id)}
+            practiced={practicedIds?.has(word.id) ?? false}
             active={activeWordId === word.id}
             accentColor={environment.accentColor}
             onPress={() => onWordPress(word)}

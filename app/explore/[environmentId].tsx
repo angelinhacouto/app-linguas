@@ -1,21 +1,38 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ExplorationArena } from '@/components/ExplorationArena';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { ExplorationWorld } from '@/components/ExplorationWorld';
+import { FeedbackBanner } from '@/components/FeedbackBanner';
 import { HeroAvatar } from '@/components/HeroAvatar';
+import { HeroPowerEffects } from '@/components/HeroPowerEffects';
+import { MicButton } from '@/components/MicButton';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { COLORS } from '@/constants';
 import {
+  getHeroFeedbackSpeech,
+  HeroReactionTier,
+  scoreToTier,
+} from '@/constants/heroReactions';
+import { getSuperHero } from '@/constants/heroes';
+import { getLanguage } from '@/constants/languages';
+import {
   ENVIRONMENT_IDS,
-  environmentLessonId,
   getEnvironmentMeta,
   getEnvironmentWords,
 } from '@/data/environments';
-import { getSuperHero } from '@/constants/heroes';
-import { getLanguage } from '@/constants/languages';
-import { speakHeroLine, speakWordOnly } from '@/hooks/useSpeech';
-import { EnvironmentId, LanguageId, Word } from '@/types';
+import { usePronunciationMic } from '@/hooks/usePronunciationMic';
+import {
+  speakFeedback,
+  speakHeroLine,
+  speakHeroPresentsCard,
+  speakHeroReaction,
+  speakWordOnly,
+} from '@/hooks/useSpeech';
+import { PronunciationService } from '@/services/pronunciation';
+import { EnvironmentId, LanguageId, PronunciationFeedback, Word } from '@/types';
+
+type ExplorePhase = 'idle' | 'hero_speaking' | 'your_turn' | 'listening' | 'feedback';
 
 export function generateStaticParams() {
   return ENVIRONMENT_IDS.map((environmentId) => ({ environmentId }));
@@ -29,7 +46,6 @@ export default function ExploreScreen() {
     name?: string;
   }>();
 
-  const router = useRouter();
   const languageId = (language ?? 'en') as LanguageId;
   const studentName = name ?? 'Herói';
   const superHero = getSuperHero(hero ?? 'spider-man');
@@ -50,48 +66,151 @@ export default function ExploreScreen() {
   );
 
   const [discoveredIds, setDiscoveredIds] = useState<Set<string>>(new Set());
+  const [practicedIds, setPracticedIds] = useState<Set<string>>(new Set());
   const [activeWord, setActiveWord] = useState<Word | null>(null);
   const [heroLine, setHeroLine] = useState('');
-  const [complete, setComplete] = useState(false);
+  const [phase, setPhase] = useState<ExplorePhase>('idle');
+  const [feedback, setFeedback] = useState<PronunciationFeedback | null>(null);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [heroMood, setHeroMood] = useState<'idle' | 'power' | 'teach' | 'practice' | 'present'>(
+    'idle'
+  );
+  const [reactionTier, setReactionTier] = useState<HeroReactionTier | null>(null);
+  const [showEffects, setShowEffects] = useState(false);
+  const [missionComplete, setMissionComplete] = useState(false);
+
+  const { isListening, error: micError, listen, reset: resetMic, isSupported } =
+    usePronunciationMic(languageId);
 
   useEffect(() => {
     if (!environment) return;
-    const line = `Olá, ${studentName}! ${environment.introLine}`;
+    const line = `Olá, ${studentName}! ${environment.introLine} Toque num objeto, ouça o ${lang.label.toLowerCase()} e repita no microfone.`;
     setHeroLine(line);
+    setPhase('idle');
     speakHeroLine(line);
-  }, [environment, studentName]);
+  }, [environment, studentName, lang.label]);
 
   useEffect(() => {
-    if (words.length > 0 && discoveredIds.size >= words.length && !complete) {
-      setComplete(true);
-      const line = `Muito bem, ${studentName}! Você achou tudo no ${environment?.title ?? 'ambiente'}!`;
-      setHeroLine(line);
-      speakHeroLine(line);
-    }
-  }, [discoveredIds.size, words.length, studentName, environment?.title, complete]);
+    if (words.length === 0 || practicedIds.size < words.length || missionComplete) return;
+    setMissionComplete(true);
+    const line = `Missão completa, ${studentName}! Você praticou tudo no ${environment?.title ?? 'ambiente'}!`;
+    setHeroLine(line);
+    speakFeedback(line);
+  }, [practicedIds.size, words.length, studentName, environment?.title, missionComplete]);
 
-  const handleWordPress = useCallback(
+  const presentWord = useCallback(
     (word: Word) => {
       setActiveWord(word);
       setDiscoveredIds((prev) => new Set(prev).add(word.id));
-      setHeroLine(`Isso é ${word.translation}! Em ${lang.label}: ${word.text}`);
-      speakHeroLine(`Isso é ${word.translation}! Em ${lang.label.toLowerCase()}, fala assim:`);
-      setTimeout(() => speakWordOnly(word.text, languageId), 1100);
+      setFeedback(null);
+      setReactionTier(null);
+      setShowEffects(false);
+      setHeroMood('present');
+      setPhase('hero_speaking');
+      setHeroLine(
+        `${superHero.name}: Isso é ${word.translation}! Ouve em ${lang.label.toLowerCase()}: "${word.text}"`
+      );
+
+      speakHeroPresentsCard(word.translation, word.text, languageId, () => {
+        setHeroMood('idle');
+        setPhase('your_turn');
+        setHeroLine(
+          `Agora é sua vez, ${studentName}! Toque no microfone 🎤 e repita: "${word.text}"`
+        );
+      });
     },
-    [lang.label, languageId]
+    [superHero.name, lang.label, languageId, studentName]
   );
 
-  const handlePractice = useCallback(() => {
-    router.push({
-      pathname: `/play/${environmentLessonId(envId)}`,
-      params: {
-        name: studentName,
-        ageGroup: '3-4',
-        language: languageId,
-        hero: superHero.id,
-      },
-    });
-  }, [router, envId, studentName, languageId, superHero.id]);
+  const handleObjectSelect = useCallback(
+    (word: Word) => {
+      if (phase === 'hero_speaking' || phase === 'listening' || isEvaluating) return;
+      presentWord(word);
+    },
+    [phase, isEvaluating, presentWord]
+  );
+
+  const applyHeroReaction = useCallback(
+    (tier: HeroReactionTier, word: Word) => {
+      const { line, speakWordAfter } = getHeroFeedbackSpeech(
+        superHero.id,
+        superHero.name,
+        studentName,
+        tier
+      );
+
+      setReactionTier(tier);
+      setShowEffects(true);
+      setHeroMood(tier);
+      setPhase('feedback');
+      setHeroLine(line);
+
+      if (tier === 'power' || tier === 'teach') {
+        setPracticedIds((prev) => new Set(prev).add(word.id));
+      }
+
+      speakHeroReaction(line, tier, speakWordAfter ? word.text : undefined, languageId);
+
+      setTimeout(() => {
+        setShowEffects(false);
+        setHeroMood('idle');
+      }, tier === 'power' ? 3500 : 2500);
+    },
+    [superHero, studentName, languageId]
+  );
+
+  const handleMicPress = useCallback(async () => {
+    if (!activeWord || isEvaluating || phase === 'hero_speaking' || phase === 'idle') return;
+
+    setIsEvaluating(true);
+    setFeedback(null);
+    setShowEffects(false);
+    setPhase('listening');
+    setHeroLine(`${superHero.name} está ouvindo você, ${studentName}...`);
+    resetMic();
+
+    const transcripts = await listen();
+
+    if (transcripts && activeWord) {
+      const result = PronunciationService.evaluateAlternatives(activeWord.text, transcripts);
+      setFeedback(result);
+      applyHeroReaction(scoreToTier(result.score), activeWord);
+    } else {
+      setPhase('your_turn');
+      setHeroLine(`Não ouvi bem, ${studentName}. Toque no microfone e fale mais alto!`);
+    }
+
+    setIsEvaluating(false);
+  }, [
+    activeWord,
+    isEvaluating,
+    phase,
+    listen,
+    resetMic,
+    superHero.name,
+    studentName,
+    applyHeroReaction,
+  ]);
+
+  const handleRetry = useCallback(() => {
+    if (!activeWord) return;
+    setFeedback(null);
+    setReactionTier(null);
+    setShowEffects(false);
+    setPhase('your_turn');
+    setHeroMood('idle');
+    setHeroLine(`Tenta de novo, ${studentName}! Fala: "${activeWord.text}"`);
+  }, [studentName, activeWord]);
+
+  const handleListenAgain = useCallback(() => {
+    if (!activeWord) return;
+    speakWordOnly(activeWord.text, languageId);
+  }, [activeWord, languageId]);
+
+  const handleHeroReplay = useCallback(() => {
+    if (!activeWord || phase === 'listening' || isEvaluating) return;
+    presentWord(activeWord);
+  }, [activeWord, phase, isEvaluating, presentWord]);
 
   if (!environment || words.length === 0) {
     return (
@@ -103,23 +222,52 @@ export default function ExploreScreen() {
     );
   }
 
+  if (missionComplete) {
+    return (
+      <TechBackground>
+        <View style={styles.center}>
+          <HeroAvatar heroId={superHero.id} size="xl" selected mood="power" />
+          <Text style={styles.finishEmoji}>🏆</Text>
+          <Text style={styles.finishTitle}>Missão completa!</Text>
+          <Text style={styles.finishSubtitle}>
+            {superHero.name} está orgulhoso de você, {studentName}!
+          </Text>
+          <Text style={styles.finishHint}>
+            Você praticou {practicedIds.size} palavras em {environment.title}.
+          </Text>
+        </View>
+      </TechBackground>
+    );
+  }
+
   return (
     <TechBackground>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={[styles.heroRow, { borderColor: superHero.accent }]}>
-          <HeroAvatar heroId={superHero.id} size="md" />
+          <View style={styles.heroAvatarWrap}>
+            <HeroAvatar heroId={superHero.id} size="md" selected mood={heroMood} />
+            {reactionTier && (
+              <HeroPowerEffects heroId={superHero.id} tier={reactionTier} active={showEffects} />
+            )}
+          </View>
           <View style={styles.heroInfo}>
             <Text style={styles.greeting}>Com {superHero.name}</Text>
-            <Text style={styles.mission}>Explorando: {environment.title}</Text>
+            <Text style={styles.mission}>
+              {environment.emoji} {environment.title} · {lang.label}
+            </Text>
+            <Text style={styles.progress}>
+              {practicedIds.size}/{words.length} praticados
+            </Text>
           </View>
         </View>
 
-        <ExplorationArena
+        <ExplorationWorld
           environment={environment}
           words={words}
           discoveredIds={discoveredIds}
+          practicedIds={practicedIds}
           activeWordId={activeWord?.id}
-          onWordPress={handleWordPress}
+          onObjectSelect={handleObjectSelect}
         />
 
         <View style={[styles.bubble, { borderColor: environment.accentColor }]}>
@@ -131,29 +279,88 @@ export default function ExploreScreen() {
             <Text style={styles.wordEmoji}>{activeWord.emoji}</Text>
             <Text style={styles.wordText}>{activeWord.text}</Text>
             <Text style={styles.wordTranslation}>{activeWord.translation}</Text>
-            <TechButton
-              label="Ouvir de novo"
-              emoji="🔊"
-              variant="secondary"
-              onPress={() => speakWordOnly(activeWord.text, languageId)}
-              style={styles.listenBtn}
-            />
+            {phase === 'your_turn' ? (
+              <Text style={styles.turnHint}>Repita no microfone ↓</Text>
+            ) : null}
           </View>
+        ) : (
+          <Text style={styles.idleHint}>Toque num cubo 3D para começar a missão</Text>
+        )}
+
+        {feedback ? (
+          <FeedbackBanner
+            result={feedback.result}
+            message={feedback.message}
+            encouragement={feedback.encouragement}
+            score={feedback.score}
+            heard={feedback.heard}
+            target={feedback.target}
+          />
         ) : null}
 
-        {complete ? (
-          <View style={styles.completeBox}>
-            <Text style={styles.completeEmoji}>🎉</Text>
-            <Text style={styles.completeTitle}>Tudo encontrado!</Text>
-            <Text style={styles.completeSub}>Quer treinar a pronúncia agora?</Text>
-            <TechButton
-              label="Praticar com o microfone"
-              emoji="🎤"
-              onPress={handlePractice}
-              style={styles.practiceBtn}
-            />
-          </View>
+        {!isSupported ? (
+          <Text style={styles.warnText}>
+            Use Chrome ou Edge e permita o microfone para análise de pronúncia.
+          </Text>
         ) : null}
+
+        {micError ? <Text style={styles.errorText}>{micError}</Text> : null}
+
+        <View style={styles.actions}>
+          {isEvaluating || phase === 'listening' ? (
+            <ActivityIndicator size="large" color={COLORS.primary} />
+          ) : feedback && phase === 'feedback' ? (
+            <View style={styles.feedbackActions}>
+              {feedback.score < 70 ? (
+                <>
+                  <TechButton
+                    label="Tentar de novo"
+                    emoji="🎤"
+                    variant="secondary"
+                    onPress={handleRetry}
+                    style={styles.actionBtn}
+                  />
+                  <TechButton
+                    label="Ouvir de novo"
+                    emoji="🔊"
+                    variant="secondary"
+                    onPress={handleHeroReplay}
+                    style={styles.actionBtn}
+                  />
+                </>
+              ) : null}
+              <TechButton
+                label="Próximo objeto"
+                emoji="👉"
+                onPress={() => {
+                  setFeedback(null);
+                  setReactionTier(null);
+                  setPhase('idle');
+                  setActiveWord(null);
+                  setHeroLine(`Escolha outro objeto no ${environment.title}, ${studentName}!`);
+                }}
+                style={styles.actionBtn}
+              />
+            </View>
+          ) : phase === 'your_turn' || phase === 'feedback' ? (
+            <>
+              <MicButton
+                isRecording={isListening || isEvaluating}
+                onPress={handleMicPress}
+                disabled={isEvaluating || !isSupported}
+              />
+              <TechButton
+                label="Ouvir palavra"
+                emoji="🔊"
+                variant="secondary"
+                onPress={handleListenAgain}
+                style={styles.listenBtn}
+              />
+            </>
+          ) : phase === 'hero_speaking' ? (
+            <Text style={styles.listeningHint}>Ouça o herói falando...</Text>
+          ) : null}
+        </View>
       </ScrollView>
     </TechBackground>
   );
@@ -169,10 +376,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+    gap: 8,
   },
   errorText: {
     color: '#E53935',
-    fontSize: 16,
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  warnText: {
+    color: COLORS.warning,
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 8,
+    paddingHorizontal: 12,
   },
   heroRow: {
     flexDirection: 'row',
@@ -183,6 +400,9 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
     borderWidth: 2,
+  },
+  heroAvatarWrap: {
+    position: 'relative',
   },
   heroInfo: {
     flex: 1,
@@ -198,8 +418,14 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '700',
   },
+  progress: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 4,
+    fontWeight: '700',
+  },
   bubble: {
-    marginTop: 8,
+    marginTop: 12,
     backgroundColor: COLORS.backgroundLight,
     borderRadius: 16,
     padding: 14,
@@ -220,7 +446,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   wordEmoji: {
-    fontSize: 72,
+    fontSize: 64,
   },
   wordText: {
     fontSize: 34,
@@ -233,36 +459,62 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginTop: 4,
   },
-  listenBtn: {
-    marginTop: 14,
-    minWidth: 180,
+  turnHint: {
+    marginTop: 10,
+    fontSize: 14,
+    fontWeight: '800',
+    color: COLORS.secondary,
   },
-  completeBox: {
-    marginTop: 20,
-    alignItems: 'center',
-    backgroundColor: COLORS.card,
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 2,
-    borderColor: COLORS.success,
-  },
-  completeEmoji: {
-    fontSize: 48,
-  },
-  completeTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: COLORS.success,
-    marginTop: 8,
-  },
-  completeSub: {
-    fontSize: 15,
-    color: COLORS.textLight,
+  idleHint: {
+    marginTop: 16,
     textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 16,
+    color: COLORS.textLight,
+    fontWeight: '700',
+    fontSize: 14,
   },
-  practiceBtn: {
-    minWidth: 240,
+  actions: {
+    marginTop: 16,
+    alignItems: 'center',
+    minHeight: 160,
+    justifyContent: 'center',
+    gap: 12,
+    width: '100%',
+  },
+  feedbackActions: {
+    gap: 12,
+    alignItems: 'center',
+    width: '100%',
+  },
+  actionBtn: {
+    minWidth: 220,
+  },
+  listenBtn: {
+    minWidth: 200,
+  },
+  listeningHint: {
+    color: COLORS.primary,
+    fontWeight: '800',
+    fontSize: 15,
+  },
+  finishEmoji: {
+    fontSize: 64,
+    marginTop: 8,
+  },
+  finishTitle: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: COLORS.primary,
+  },
+  finishSubtitle: {
+    fontSize: 18,
+    color: COLORS.textLight,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  finishHint: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

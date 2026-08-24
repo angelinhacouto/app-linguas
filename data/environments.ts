@@ -42,7 +42,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '⭐', x: 12, y: 12, size: 20 },
         { emoji: '🪟', x: 18, y: 28, size: 36 },
       ],
-      introLine: 'Vamos explorar o quarto! Toca nos objetos para ouvir as palavras.',
+      introLine: 'Vamos explorar o quarto em 3D!',
     },
     layouts: [
       { id: 'bed', emoji: '🛏️', position: { x: 24, y: 58 } },
@@ -103,7 +103,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '🍳', x: 88, y: 10, size: 30 },
         { emoji: '✨', x: 10, y: 18, size: 18 },
       ],
-      introLine: 'Entramos na cozinha! Toca nos objetos para descobrir as palavras.',
+      introLine: 'Entramos na cozinha em 3D!',
     },
     layouts: [
       { id: 'table', emoji: '🪑', position: { x: 50, y: 62 } },
@@ -164,7 +164,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '🖼️', x: 50, y: 12, size: 28 },
         { emoji: '💡', x: 8, y: 22, size: 22 },
       ],
-      introLine: 'Estamos na sala! Descubra os objetos tocando neles.',
+      introLine: 'Estamos na sala em 3D!',
     },
     layouts: [
       { id: 'sofa', emoji: '🛋️', position: { x: 42, y: 58 } },
@@ -225,7 +225,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '💧', x: 15, y: 10, size: 22 },
         { emoji: '💧', x: 85, y: 14, size: 18 },
       ],
-      introLine: 'Hora de explorar o banheiro! Toque em cada objeto.',
+      introLine: 'Hora de explorar o banheiro em 3D!',
     },
     layouts: [
       { id: 'bath', emoji: '🛁', position: { x: 34, y: 58 } },
@@ -287,7 +287,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '🌳', x: 88, y: 28, size: 36 },
         { emoji: '☁️', x: 55, y: 8, size: 30 },
       ],
-      introLine: 'Aventura na floresta! Toque nos elementos da natureza.',
+      introLine: 'Aventura na floresta em 3D!',
     },
     layouts: [
       { id: 'tree', emoji: '🌳', position: { x: 26, y: 48 } },
@@ -349,7 +349,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '☁️', x: 70, y: 8, size: 24 },
         { emoji: '🌊', x: 50, y: 38, size: 36 },
       ],
-      introLine: 'Dia de praia! Descubra as palavras na areia e no mar.',
+      introLine: 'Dia de praia em 3D!',
     },
     layouts: [
       { id: 'sand', emoji: '🏖️', position: { x: 50, y: 76 } },
@@ -411,7 +411,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '🌳', x: 90, y: 22, size: 30 },
         { emoji: '☀️', x: 75, y: 8, size: 26 },
       ],
-      introLine: 'Hora de brincar no parque! Toque nos brinquedos e objetos.',
+      introLine: 'Hora de brincar no parque em 3D!',
     },
     layouts: [
       { id: 'slide', emoji: '🛝', position: { x: 28, y: 52 } },
@@ -473,7 +473,7 @@ const ENVIRONMENT_DEFINITIONS: EnvironmentTemplate[] = [
         { emoji: '☁️', x: 65, y: 12, size: 22 },
         { emoji: '🌾', x: 45, y: 78, size: 28 },
       ],
-      introLine: 'Vamos à fazenda! Conheça os animais e objetos do campo.',
+      introLine: 'Vamos à fazenda em 3D!',
     },
     layouts: [
       { id: 'cow', emoji: '🐄', position: { x: 24, y: 56 } },
