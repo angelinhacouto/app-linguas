@@ -27,18 +27,18 @@ const PRESETS = {
     </svg>`,
   },
   'spider-man': {
-    crop: { left: 0, top: 12, width: 273, height: 290 },
+    crop: { left: 0, top: 0, width: 270, height: 340 },
     out: 'spider-man.png',
     svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="g" cx="50%" cy="40%" r="58%">
-          <stop offset="0%" stop-color="#4a0a0a"/>
-          <stop offset="45%" stop-color="#180505"/>
+        <radialGradient id="g" cx="50%" cy="38%" r="62%">
+          <stop offset="0%" stop-color="#2a1218"/>
+          <stop offset="45%" stop-color="#120810"/>
           <stop offset="100%" stop-color="#05070f"/>
         </radialGradient>
-        <radialGradient id="glow" cx="50%" cy="38%" r="22%">
-          <stop offset="0%" stop-color="#ff5252" stop-opacity="0.28"/>
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+        <radialGradient id="glow" cx="50%" cy="35%" r="24%">
+          <stop offset="0%" stop-color="#ff5252" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#1565c0" stop-opacity="0"/>
         </radialGradient>
       </defs>
       <rect width="512" height="512" fill="url(#g)"/>
