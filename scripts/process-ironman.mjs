@@ -25,8 +25,8 @@ const OUTS = [
   path.join(root, 'public', 'heroes', 'ironman.png'),
 ];
 
-/** Foco no torso + reator — ideal para avatar circular */
-const CROP = { left: 8, top: 52, width: 374, height: 410 };
+/** Close-up no capacete + reator — máximo impacto no círculo */
+const CROP = { left: 0, top: 0, width: 377, height: 420 };
 
 async function buildIronManAvatar() {
   mkdirSync(path.dirname(OUTS[0]), { recursive: true });
