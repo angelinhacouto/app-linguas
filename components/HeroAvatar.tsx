@@ -40,11 +40,23 @@ export function HeroAvatar({
   const hero = getSuperHero(heroId);
   const dim = SIZES[size];
   const isCinematic =
-    hero.id === 'ironman' || hero.id === 'spider-man' || hero.id === 'batman';
+    hero.id === 'ironman' ||
+    hero.id === 'spider-man' ||
+    hero.id === 'batman' ||
+    hero.id === 'thor';
   const isIronMan = hero.id === 'ironman';
   const isSpiderMan = hero.id === 'spider-man';
   const isBatman = hero.id === 'batman';
-  const glowColor = isIronMan ? '#00E5FF' : isSpiderMan ? '#FF5252' : isBatman ? '#FFD700' : hero.accent;
+  const isThor = hero.id === 'thor';
+  const glowColor = isIronMan
+    ? '#00E5FF'
+    : isSpiderMan
+      ? '#FF5252'
+      : isBatman
+        ? '#FFD700'
+        : isThor
+          ? '#90CAF9'
+          : hero.accent;
   const [failed, setFailed] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -150,12 +162,16 @@ export function HeroAvatar({
                 ? 'rgba(0,229,255,0.35)'
                 : isSpiderMan
                   ? 'rgba(255,82,82,0.4)'
-                  : 'rgba(255,215,0,0.35)',
+                  : isThor
+                    ? 'rgba(144,202,249,0.45)'
+                    : 'rgba(255,215,0,0.35)',
               backgroundColor: isIronMan
                 ? 'rgba(0,229,255,0.08)'
                 : isSpiderMan
                   ? 'rgba(198,40,40,0.12)'
-                  : 'rgba(255,215,0,0.08)',
+                  : isThor
+                    ? 'rgba(144,202,249,0.1)'
+                    : 'rgba(255,215,0,0.08)',
               shadowColor: glowColor,
             },
           ]}
@@ -192,6 +208,7 @@ export function HeroAvatar({
           isCinematic && styles.cinematicWrap,
           isIronMan && styles.ironWrap,
           isBatman && styles.batmanWrap,
+          isThor && styles.thorWrap,
           selected && styles.selected,
           {
             transform: [
@@ -324,6 +341,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     shadowOpacity: 0.9,
     shadowRadius: 18,
+  },
+  thorWrap: {
+    borderColor: 'rgba(144,202,249,0.55)',
+    borderWidth: 2,
+    shadowOpacity: 0.95,
+    shadowRadius: 20,
   },
   image: {
     backgroundColor: 'transparent',

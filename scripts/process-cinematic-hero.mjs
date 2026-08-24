@@ -64,6 +64,25 @@ const PRESETS = {
       <rect width="512" height="512" fill="url(#glow)"/>
     </svg>`,
   },
+  thor: {
+    crop: { left: 668, top: 0, width: 180, height: 331 },
+    out: 'thor.png',
+    svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="g" cx="50%" cy="40%" r="58%">
+          <stop offset="0%" stop-color="#1a2847"/>
+          <stop offset="45%" stop-color="#0a1020"/>
+          <stop offset="100%" stop-color="#05070f"/>
+        </radialGradient>
+        <radialGradient id="glow" cx="50%" cy="38%" r="24%">
+          <stop offset="0%" stop-color="#90caf9" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#ffd700" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="512" height="512" fill="url(#g)"/>
+      <rect width="512" height="512" fill="url(#glow)"/>
+    </svg>`,
+  },
 };
 
 async function buildHeroAvatar(heroId, sourcePath) {
