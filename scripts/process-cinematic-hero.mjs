@@ -104,7 +104,7 @@ const PRESETS = {
     </svg>`,
   },
   hulk: {
-    crop: { left: 0, top: 30, width: 275, height: 360 },
+    crop: { left: 0, top: 0, width: 267, height: 340 },
     out: 'hulk.png',
     svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <defs>
