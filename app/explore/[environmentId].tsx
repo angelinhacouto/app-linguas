@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { CustomRoomPhotoExplorer } from '@/components/CustomRoomPhotoExplorer';
 import { ExplorationWorld } from '@/components/ExplorationWorld';
 import { FeedbackBanner } from '@/components/FeedbackBanner';
 import { HeroAvatar } from '@/components/HeroAvatar';
 import { HeroPowerEffects } from '@/components/HeroPowerEffects';
 import { MicButton } from '@/components/MicButton';
+import { RoomPhotoUploadPanel } from '@/components/RoomPhotoUploadPanel';
+import { RoomPhotoFileInput } from '@/components/RoomPhotoFileInput';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { COLORS } from '@/constants';
@@ -22,6 +25,7 @@ import {
   getEnvironmentWords,
 } from '@/data/environments';
 import { usePronunciationMic } from '@/hooks/usePronunciationMic';
+import { useCustomRoomPhoto } from '@/hooks/useCustomRoomPhoto';
 import {
   speakFeedback,
   speakHeroLine,
@@ -82,13 +86,23 @@ export default function ExploreScreen() {
   const { isListening, error: micError, listen, reset: resetMic, isSupported } =
     usePronunciationMic(languageId);
 
+  const supportsCustomPhoto = environment?.group === 'house';
+  const customRoom = useCustomRoomPhoto(envId, words);
+  const showPhotoExplorer =
+    supportsCustomPhoto &&
+    customRoom.viewMode === 'photo' &&
+    !!customRoom.photoUri;
+
   useEffect(() => {
     if (!environment) return;
-    const line = `Olá, ${studentName}! ${environment.introLine} Toque num objeto, ouça o ${lang.label.toLowerCase()} e repita no microfone.`;
+    const customHint = supportsCustomPhoto
+      ? ' Você pode enviar uma foto real do ambiente e marcar os objetos!'
+      : '';
+    const line = `Olá, ${studentName}! ${environment.introLine}${customHint} Toque num objeto, ouça o ${lang.label.toLowerCase()} e repita no microfone.`;
     setHeroLine(line);
     setPhase('idle');
     speakHeroLine(line);
-  }, [environment, studentName, lang.label]);
+  }, [environment, studentName, lang.label, supportsCustomPhoto]);
 
   useEffect(() => {
     if (words.length === 0 || practicedIds.size < words.length || missionComplete) return;
@@ -124,10 +138,11 @@ export default function ExploreScreen() {
 
   const handleObjectSelect = useCallback(
     (word: Word) => {
+      if (customRoom.isSetupMode) return;
       if (phase === 'hero_speaking' || phase === 'listening' || isEvaluating) return;
       presentWord(word);
     },
-    [phase, isEvaluating, presentWord]
+    [phase, isEvaluating, presentWord, customRoom.isSetupMode]
   );
 
   const applyHeroReaction = useCallback(
@@ -261,14 +276,55 @@ export default function ExploreScreen() {
           </View>
         </View>
 
-        <ExplorationWorld
-          environment={environment}
-          words={words}
-          discoveredIds={discoveredIds}
-          practicedIds={practicedIds}
-          activeWordId={activeWord?.id}
-          onObjectSelect={handleObjectSelect}
-        />
+        {supportsCustomPhoto ? (
+          <>
+            <RoomPhotoFileInput
+              inputRef={customRoom.fileInputRef}
+              onFile={(file) => void customRoom.handleFileSelected(file)}
+            />
+            <RoomPhotoUploadPanel
+              hasPhoto={!!customRoom.photoUri}
+              viewMode={customRoom.viewMode}
+              setupComplete={customRoom.setupComplete}
+              placedCount={customRoom.placedCount}
+              totalWords={words.length}
+              isUploading={customRoom.isUploading}
+              uploadError={customRoom.uploadError}
+              onUpload={customRoom.openPhotoPicker}
+              onSwitch3d={() => customRoom.setViewMode('3d')}
+              onSwitchPhoto={() => customRoom.setViewMode('photo')}
+              onResetPlacement={customRoom.resetPlacement}
+              onRemovePhoto={customRoom.removePhoto}
+            />
+          </>
+        ) : null}
+
+        {showPhotoExplorer && customRoom.photoUri ? (
+          <CustomRoomPhotoExplorer
+            photoUri={customRoom.photoUri}
+            words={words}
+            hotspots={customRoom.hotspots}
+            discoveredIds={discoveredIds}
+            practicedIds={practicedIds}
+            activeWordId={activeWord?.id}
+            accentColor={environment.accentColor}
+            setupMode={customRoom.isSetupMode}
+            setupWord={customRoom.setupWord}
+            setupWordIndex={customRoom.setupWordIndex}
+            placedCount={customRoom.placedCount}
+            onPhotoPress={customRoom.placeHotspot}
+            onObjectSelect={handleObjectSelect}
+          />
+        ) : (
+          <ExplorationWorld
+            environment={environment}
+            words={words}
+            discoveredIds={discoveredIds}
+            practicedIds={practicedIds}
+            activeWordId={activeWord?.id}
+            onObjectSelect={handleObjectSelect}
+          />
+        )}
 
         <View style={[styles.bubble, { borderColor: environment.accentColor }]}>
           <Text style={styles.bubbleText}>{heroLine}</Text>
@@ -283,6 +339,12 @@ export default function ExploreScreen() {
               <Text style={styles.turnHint}>Repita no microfone ↓</Text>
             ) : null}
           </View>
+        ) : customRoom.isSetupMode ? (
+          <Text style={styles.idleHint}>
+            Marque todos os objetos na foto para começar a missão
+          </Text>
+        ) : showPhotoExplorer ? (
+          <Text style={styles.idleHint}>Toque num objeto na sua foto para começar</Text>
         ) : (
           <Text style={styles.idleHint}>Toque num cubo 3D para começar a missão</Text>
         )}
