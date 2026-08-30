@@ -43,11 +43,13 @@ export function HeroAvatar({
     hero.id === 'ironman' ||
     hero.id === 'spider-man' ||
     hero.id === 'batman' ||
-    hero.id === 'thor';
+    hero.id === 'thor' ||
+    hero.id === 'captain-america';
   const isIronMan = hero.id === 'ironman';
   const isSpiderMan = hero.id === 'spider-man';
   const isBatman = hero.id === 'batman';
   const isThor = hero.id === 'thor';
+  const isCaptainAmerica = hero.id === 'captain-america';
   const glowColor = isIronMan
     ? '#00E5FF'
     : isSpiderMan
@@ -56,7 +58,9 @@ export function HeroAvatar({
         ? '#FFD700'
         : isThor
           ? '#90CAF9'
-          : hero.accent;
+          : isCaptainAmerica
+            ? '#1565C0'
+            : hero.accent;
   const [failed, setFailed] = useState(false);
 
   const scale = useRef(new Animated.Value(1)).current;
@@ -164,14 +168,18 @@ export function HeroAvatar({
                   ? 'rgba(255,82,82,0.4)'
                   : isThor
                     ? 'rgba(144,202,249,0.45)'
-                    : 'rgba(255,215,0,0.35)',
+                    : isCaptainAmerica
+                      ? 'rgba(21,101,192,0.5)'
+                      : 'rgba(255,215,0,0.35)',
               backgroundColor: isIronMan
                 ? 'rgba(0,229,255,0.08)'
                 : isSpiderMan
                   ? 'rgba(198,40,40,0.12)'
                   : isThor
                     ? 'rgba(144,202,249,0.1)'
-                    : 'rgba(255,215,0,0.08)',
+                    : isCaptainAmerica
+                      ? 'rgba(21,101,192,0.12)'
+                      : 'rgba(255,215,0,0.08)',
               shadowColor: glowColor,
             },
           ]}
@@ -209,6 +217,7 @@ export function HeroAvatar({
           isIronMan && styles.ironWrap,
           isBatman && styles.batmanWrap,
           isThor && styles.thorWrap,
+          isCaptainAmerica && styles.capWrap,
           selected && styles.selected,
           {
             transform: [
@@ -347,6 +356,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     shadowOpacity: 0.95,
     shadowRadius: 20,
+  },
+  capWrap: {
+    borderColor: 'rgba(21,101,192,0.55)',
+    borderWidth: 2,
+    shadowOpacity: 0.9,
+    shadowRadius: 18,
   },
   image: {
     backgroundColor: 'transparent',
