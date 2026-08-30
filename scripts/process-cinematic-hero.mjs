@@ -103,6 +103,25 @@ const PRESETS = {
       <rect width="512" height="512" fill="url(#glow)"/>
     </svg>`,
   },
+  hulk: {
+    crop: { left: 0, top: 30, width: 275, height: 360 },
+    out: 'hulk.png',
+    svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="g" cx="50%" cy="40%" r="58%">
+          <stop offset="0%" stop-color="#1b3a1b"/>
+          <stop offset="45%" stop-color="#0a180a"/>
+          <stop offset="100%" stop-color="#05070f"/>
+        </radialGradient>
+        <radialGradient id="glow" cx="50%" cy="38%" r="24%">
+          <stop offset="0%" stop-color="#66bb6a" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#a5d6a7" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="512" height="512" fill="url(#g)"/>
+      <rect width="512" height="512" fill="url(#glow)"/>
+    </svg>`,
+  },
 };
 
 async function buildHeroAvatar(heroId, sourcePath) {
