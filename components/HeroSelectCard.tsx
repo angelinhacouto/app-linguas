@@ -21,7 +21,9 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
   const isThor = hero.id === 'thor';
   const isCaptainAmerica = hero.id === 'captain-america';
   const isHulk = hero.id === 'hulk';
-  const isCinematic = isIronMan || isSpiderMan || isBatman || isThor || isCaptainAmerica || isHulk;
+  const isSuperman = hero.id === 'superman';
+  const isCinematic =
+    isIronMan || isSpiderMan || isBatman || isThor || isCaptainAmerica || isHulk || isSuperman;
 
   const handlePress = () => {
     onPress();
@@ -58,7 +60,9 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
                     ? styles.capAvatarBg
                     : isHulk
                       ? styles.hulkAvatarBg
-                      : styles.ironAvatarBg),
+                      : isSuperman
+                        ? styles.supermanAvatarBg
+                        : styles.ironAvatarBg),
           selected &&
             isCinematic &&
             (isSpiderMan
@@ -71,7 +75,9 @@ export function HeroSelectCard({ hero, selected, onPress }: HeroSelectCardProps)
                     ? styles.capAvatarSelected
                     : isHulk
                       ? styles.hulkAvatarSelected
-                      : styles.ironAvatarSelected),
+                      : isSuperman
+                        ? styles.supermanAvatarSelected
+                        : styles.ironAvatarSelected),
         ]}
       >
         {!imgFailed ? (
@@ -198,6 +204,18 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   hulkAvatarSelected: {
+    borderWidth: 3,
+    shadowOpacity: 1,
+    shadowRadius: 20,
+  },
+  supermanAvatarBg: {
+    shadowColor: '#FFD700',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.75,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  supermanAvatarSelected: {
     borderWidth: 3,
     shadowOpacity: 1,
     shadowRadius: 20,
