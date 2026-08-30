@@ -1,4 +1,5 @@
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { useRef } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { TechButton } from '@/components/TechButton';
 import { COLORS } from '@/constants';
 
@@ -11,7 +12,7 @@ interface RoomPhotoUploadPanelProps {
   isUploading: boolean;
   uploadError: string | null;
   onUpload: () => void;
-  onFileSelected?: (file: File | null) => void;
+  onFileSelected: (file: File | null) => void;
   onSwitch3d: () => void;
   onSwitchPhoto: () => void;
   onResetPlacement: () => void;
@@ -26,38 +27,50 @@ export function RoomPhotoUploadPanel({
   totalWords,
   isUploading,
   uploadError,
-  onUpload,
+  onFileSelected,
   onSwitch3d,
   onSwitchPhoto,
   onResetPlacement,
   onRemovePhoto,
 }: RoomPhotoUploadPanelProps) {
-  if (Platform.OS !== 'web') {
-    return (
-      <View style={styles.box}>
-        <Text style={styles.title}>📷 Quarto real</Text>
-        <Text style={styles.hint}>
-          Abra o site no Chrome ou Edge para enviar uma foto do quarto e marcar os objetos.
-        </Text>
-      </View>
-    );
-  }
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openPicker = () => {
+    inputRef.current?.click();
+  };
 
   return (
-    <View style={styles.box}>
-      <Text style={styles.title}>📷 Seu ambiente real</Text>
+    <View style={[styles.box, !hasPhoto && styles.boxHighlight]}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          onFileSelected(e.target.files?.[0] ?? null);
+          e.target.value = '';
+        }}
+      />
+
+      <Text style={styles.step}>PASSO 1</Text>
+      <Text style={styles.title}>📷 Foto do seu quarto real</Text>
       <Text style={styles.hint}>
-        Envie uma foto do quarto e toque nos objetos para colocar os nomes em inglês.
+        {hasPhoto
+          ? setupComplete
+            ? 'Sua foto está pronta! Toque nos objetos para praticar inglês.'
+            : `Marque ${totalWords} objetos na foto (cama, abajur, etc.) tocando onde estão.`
+          : 'Envie uma foto do quarto da criança. Depois você marca cada objeto na imagem.'}
       </Text>
 
       <View style={styles.row}>
         <TechButton
-          label={hasPhoto ? 'Trocar foto' : 'Enviar foto'}
-          emoji="📷"
-          variant="secondary"
-          onPress={onUpload}
+          label={isUploading ? 'Carregando...' : hasPhoto ? 'Trocar foto' : 'Enviar foto'}
+          emoji={isUploading ? '⏳' : '📷'}
+          variant={hasPhoto ? 'secondary' : 'primary'}
+          onPress={openPicker}
           disabled={isUploading}
-          style={styles.btn}
+          style={styles.btnPrimary}
         />
         {hasPhoto ? (
           <>
@@ -80,11 +93,18 @@ export function RoomPhotoUploadPanel({
         ) : null}
       </View>
 
+      {isUploading ? (
+        <View style={styles.loadingRow}>
+          <ActivityIndicator color={COLORS.primary} />
+          <Text style={styles.loadingText}>Preparando sua foto...</Text>
+        </View>
+      ) : null}
+
       {hasPhoto ? (
         <Text style={styles.status}>
           {setupComplete
-            ? `${placedCount} objetos marcados — pronto para explorar!`
-            : `${placedCount}/${totalWords} objetos marcados na foto`}
+            ? `✅ ${placedCount} objetos marcados — pronto para explorar!`
+            : `📍 ${placedCount}/${totalWords} objetos marcados na foto`}
         </Text>
       ) : null}
 
@@ -103,41 +123,68 @@ const styles = StyleSheet.create({
   box: {
     backgroundColor: COLORS.card,
     borderRadius: 14,
-    padding: 14,
+    padding: 16,
     marginBottom: 14,
     borderWidth: 2,
     borderColor: COLORS.cardBorder,
   },
+  boxHighlight: {
+    borderColor: COLORS.secondary,
+    backgroundColor: 'rgba(255,61,0,0.06)',
+  },
+  step: {
+    fontSize: 10,
+    letterSpacing: 2,
+    color: COLORS.secondary,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '900',
     color: COLORS.text,
   },
   hint: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textLight,
-    marginTop: 6,
-    lineHeight: 18,
+    marginTop: 8,
+    lineHeight: 20,
   },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginTop: 12,
+    marginTop: 14,
+  },
+  btnPrimary: {
+    minWidth: 180,
+    flex: 1,
   },
   btn: {
-    minWidth: 140,
+    minWidth: 130,
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 12,
+  },
+  loadingText: {
+    color: COLORS.primary,
+    fontWeight: '700',
+    fontSize: 13,
   },
   status: {
-    marginTop: 10,
-    fontSize: 12,
+    marginTop: 12,
+    fontSize: 13,
     fontWeight: '700',
     color: COLORS.primary,
   },
   error: {
-    marginTop: 8,
+    marginTop: 10,
     color: '#E53935',
     fontSize: 13,
+    fontWeight: '700',
   },
   remove: {
     marginTop: 10,

@@ -8,7 +8,6 @@ import { HeroAvatar } from '@/components/HeroAvatar';
 import { HeroPowerEffects } from '@/components/HeroPowerEffects';
 import { MicButton } from '@/components/MicButton';
 import { RoomPhotoUploadPanel } from '@/components/RoomPhotoUploadPanel';
-import { RoomPhotoFileInput } from '@/components/RoomPhotoFileInput';
 import { TechBackground } from '@/components/TechBackground';
 import { TechButton } from '@/components/TechButton';
 import { COLORS } from '@/constants';
@@ -277,26 +276,21 @@ export default function ExploreScreen() {
         </View>
 
         {supportsCustomPhoto ? (
-          <>
-            <RoomPhotoFileInput
-              inputRef={customRoom.fileInputRef}
-              onFile={(file) => void customRoom.handleFileSelected(file)}
-            />
-            <RoomPhotoUploadPanel
-              hasPhoto={!!customRoom.photoUri}
-              viewMode={customRoom.viewMode}
-              setupComplete={customRoom.setupComplete}
-              placedCount={customRoom.placedCount}
-              totalWords={words.length}
-              isUploading={customRoom.isUploading}
-              uploadError={customRoom.uploadError}
-              onUpload={customRoom.openPhotoPicker}
-              onSwitch3d={() => customRoom.setViewMode('3d')}
-              onSwitchPhoto={() => customRoom.setViewMode('photo')}
-              onResetPlacement={customRoom.resetPlacement}
-              onRemovePhoto={customRoom.removePhoto}
-            />
-          </>
+          <RoomPhotoUploadPanel
+            hasPhoto={!!customRoom.photoUri}
+            viewMode={customRoom.viewMode}
+            setupComplete={customRoom.setupComplete}
+            placedCount={customRoom.placedCount}
+            totalWords={words.length}
+            isUploading={customRoom.isUploading}
+            uploadError={customRoom.uploadError}
+            onUpload={customRoom.openPhotoPicker}
+            onFileSelected={(file) => void customRoom.handleFileSelected(file)}
+            onSwitch3d={() => customRoom.setViewMode('3d')}
+            onSwitchPhoto={() => customRoom.setViewMode('photo')}
+            onResetPlacement={customRoom.resetPlacement}
+            onRemovePhoto={customRoom.removePhoto}
+          />
         ) : null}
 
         {showPhotoExplorer && customRoom.photoUri ? (
@@ -315,6 +309,15 @@ export default function ExploreScreen() {
             onPhotoPress={customRoom.placeHotspot}
             onObjectSelect={handleObjectSelect}
           />
+        ) : supportsCustomPhoto && !customRoom.photoUri ? (
+          <View style={styles.photoPlaceholder}>
+            <Text style={styles.photoPlaceholderEmoji}>📷</Text>
+            <Text style={styles.photoPlaceholderTitle}>Use a foto do quarto real</Text>
+            <Text style={styles.photoPlaceholderHint}>
+              Toque em &quot;Enviar foto&quot; acima. Depois marque cama, abajur, brinquedos e
+              outros objetos na imagem.
+            </Text>
+          </View>
         ) : (
           <ExplorationWorld
             environment={environment}
@@ -345,6 +348,8 @@ export default function ExploreScreen() {
           </Text>
         ) : showPhotoExplorer ? (
           <Text style={styles.idleHint}>Toque num objeto na sua foto para começar</Text>
+        ) : supportsCustomPhoto && !customRoom.photoUri ? (
+          <Text style={styles.idleHint}>Envie a foto do quarto para começar a missão</Text>
         ) : (
           <Text style={styles.idleHint}>Toque num cubo 3D para começar a missão</Text>
         )}
@@ -578,5 +583,34 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginTop: 8,
     textAlign: 'center',
+  },
+  photoPlaceholder: {
+    width: '100%',
+    minHeight: 320,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
+    borderStyle: 'dashed',
+    backgroundColor: COLORS.backgroundLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 8,
+  },
+  photoPlaceholderEmoji: {
+    fontSize: 56,
+  },
+  photoPlaceholderTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: COLORS.text,
+    textAlign: 'center',
+  },
+  photoPlaceholderHint: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    lineHeight: 20,
+    maxWidth: 320,
   },
 });

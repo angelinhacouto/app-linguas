@@ -5,9 +5,11 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useRef, useState, type GestureResponderEvent } from 'react';
 import { COLORS } from '@/constants';
 import { RoomHotspot } from '@/services/customRoomStorage';
 import { Word } from '@/types';
+import { pressToPercent } from '@/utils/pressToPercent';
 
 interface CustomRoomPhotoExplorerProps {
   photoUri: string;
@@ -40,6 +42,20 @@ export function CustomRoomPhotoExplorer({
   onPhotoPress,
   onObjectSelect,
 }: CustomRoomPhotoExplorerProps) {
+  const frameRef = useRef<View>(null);
+  const [frameLayout, setFrameLayout] = useState({ width: 0, height: 0 });
+
+  const handleFramePress = (e: GestureResponderEvent) => {
+    const pos = pressToPercent(e, frameLayout, frameRef.current);
+    if (!pos) return;
+    if (setupMode) {
+      onPhotoPress(pos.x, pos.y);
+      return;
+    }
+    const tapped = findWordAtPoint(pos.x, pos.y, words, hotspots);
+    if (tapped) onObjectSelect(tapped);
+  };
+
   return (
     <View style={styles.wrap}>
       {setupMode && setupWord ? (
@@ -61,20 +77,9 @@ export function CustomRoomPhotoExplorer({
       )}
 
       <Pressable
-        onPress={(e) => {
-          const { locationX, locationY } = e.nativeEvent;
-          const target = e.currentTarget as unknown as { offsetWidth?: number; offsetHeight?: number };
-          const width = target.offsetWidth ?? 1;
-          const height = target.offsetHeight ?? 1;
-          const x = Math.max(4, Math.min(96, (locationX / width) * 100));
-          const y = Math.max(4, Math.min(96, (locationY / height) * 100));
-          if (setupMode) {
-            onPhotoPress(x, y);
-            return;
-          }
-          const tapped = findWordAtPoint(x, y, words, hotspots);
-          if (tapped) onObjectSelect(tapped);
-        }}
+        ref={frameRef}
+        onLayout={(e) => setFrameLayout(e.nativeEvent.layout)}
+        onPress={handleFramePress}
         style={styles.photoFrame}
       >
         <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="cover" />

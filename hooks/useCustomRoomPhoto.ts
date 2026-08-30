@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 import {
   clearCustomRoom,
@@ -16,16 +16,15 @@ export function useCustomRoomPhoto(environmentId: EnvironmentId, words: Word[]) 
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [hotspots, setHotspots] = useState<Record<string, RoomHotspot>>({});
   const [viewMode, setViewMode] = useState<ExploreViewMode>('3d');
-  const [setupWordIndex, setSetupWordIndex] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const saved = loadCustomRoom(environmentId);
     if (saved) {
       setPhotoUri(saved.photoUri);
       setHotspots(saved.hotspots);
+      setViewMode('photo');
     }
   }, [environmentId]);
 
@@ -35,7 +34,11 @@ export function useCustomRoomPhoto(environmentId: EnvironmentId, words: Word[]) 
   );
 
   const setupComplete = placedCount >= words.length && words.length > 0;
-  const setupWord = words[setupWordIndex] ?? null;
+  const setupWord = useMemo(
+    () => words.find((w) => !hotspots[w.id]) ?? null,
+    [words, hotspots]
+  );
+  const setupWordIndex = setupWord ? words.indexOf(setupWord) : words.length;
   const isSetupMode = viewMode === 'photo' && !!photoUri && !setupComplete;
 
   const persistHotspots = useCallback(
@@ -48,11 +51,9 @@ export function useCustomRoomPhoto(environmentId: EnvironmentId, words: Word[]) 
 
   const openPhotoPicker = useCallback(() => {
     setUploadError(null);
-    if (Platform.OS === 'web') {
-      fileInputRef.current?.click();
-      return;
+    if (Platform.OS !== 'web') {
+      setUploadError('Envie a foto pelo navegador (Chrome/Edge) no computador ou celular.');
     }
-    setUploadError('Envie a foto pelo navegador (Chrome/Edge) no computador ou celular.');
   }, []);
 
   const handleFileSelected = useCallback(
@@ -65,14 +66,15 @@ export function useCustomRoomPhoto(environmentId: EnvironmentId, words: Word[]) 
       setUploadError(null);
       try {
         const dataUrl = await resizeRoomPhoto(file);
-        setPhotoUri(dataUrl);
-        setHotspots({});
         saveCustomRoomPhoto(environmentId, dataUrl);
         saveCustomRoomHotspots(environmentId, {});
-        setSetupWordIndex(0);
+        setPhotoUri(dataUrl);
+        setHotspots({});
         setViewMode('photo');
-      } catch {
-        setUploadError('Não foi possível carregar a foto. Tente outra imagem.');
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : 'Não foi possível carregar a foto. Tente outra imagem.';
+        setUploadError(message);
       } finally {
         setIsUploading(false);
       }
@@ -85,21 +87,18 @@ export function useCustomRoomPhoto(environmentId: EnvironmentId, words: Word[]) 
       if (!setupWord) return;
       const next = { ...hotspots, [setupWord.id]: { x, y } };
       persistHotspots(next);
-      setSetupWordIndex((i) => Math.min(i + 1, words.length - 1));
     },
-    [setupWord, hotspots, persistHotspots, words.length]
+    [setupWord, hotspots, persistHotspots]
   );
 
   const resetPlacement = useCallback(() => {
     persistHotspots({});
-    setSetupWordIndex(0);
   }, [persistHotspots]);
 
   const removePhoto = useCallback(() => {
     clearCustomRoom(environmentId);
     setPhotoUri(null);
     setHotspots({});
-    setSetupWordIndex(0);
     setViewMode('3d');
   }, [environmentId]);
 
@@ -115,7 +114,6 @@ export function useCustomRoomPhoto(environmentId: EnvironmentId, words: Word[]) 
     placedCount,
     isUploading,
     uploadError,
-    fileInputRef,
     openPhotoPicker,
     handleFileSelected,
     placeHotspot,

@@ -28,12 +28,20 @@ export function loadCustomRoom(envId: EnvironmentId): CustomRoomData | null {
 
 export function saveCustomRoomPhoto(envId: EnvironmentId, photoUri: string) {
   if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(photoKey(envId), photoUri);
+  try {
+    localStorage.setItem(photoKey(envId), photoUri);
+  } catch {
+    throw new Error('Foto grande demais para salvar. Tente outra imagem ou foto mais simples.');
+  }
 }
 
 export function saveCustomRoomHotspots(envId: EnvironmentId, hotspots: Record<string, RoomHotspot>) {
   if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(hotspotsKey(envId), JSON.stringify(hotspots));
+  try {
+    localStorage.setItem(hotspotsKey(envId), JSON.stringify(hotspots));
+  } catch {
+    throw new Error('Não foi possível salvar os objetos marcados.');
+  }
 }
 
 export function clearCustomRoom(envId: EnvironmentId) {
