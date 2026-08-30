@@ -84,7 +84,7 @@ const PRESETS = {
     </svg>`,
   },
   'captain-america': {
-    crop: { left: 55, top: 25, width: 270, height: 330 },
+    crop: { left: 0, top: 0, width: 267, height: 360 },
     out: 'captain-america.png',
     svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <defs>
