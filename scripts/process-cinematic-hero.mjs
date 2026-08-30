@@ -123,7 +123,7 @@ const PRESETS = {
     </svg>`,
   },
   superman: {
-    crop: { left: 0, top: 0, width: 277, height: 360 },
+    crop: { left: 0, top: 0, width: 265, height: 360 },
     out: 'superman.png',
     svg: `<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
       <defs>
